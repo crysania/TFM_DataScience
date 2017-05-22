@@ -11,6 +11,6 @@ Los estudios existentes hasta la fecha sobre Turismo en España se basan en su g
   - Encuesta de gasto turístico. Egatur
   http://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177002&menu=resultados&secc=1254736195390&idp=1254735576863
 
-
+Los datos recopilados son de los últimos 12 meses publicados, periodo entre Abril del 2016 y Marzo del 2017.
 
 
