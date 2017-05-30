@@ -13,4 +13,11 @@ Los estudios existentes hasta la fecha sobre Turismo en España se basan en su g
 
 Los datos recopilados son de los últimos 12 meses publicados, periodo entre Abril del 2016 y Marzo del 2017.
 
+Objetivos del proyecto:
+  1. Gestión completa de la información de los turistas.
+  2. Análisis descriptivo, predictivo, cálculo del valor del gasto del turista y análisis de la actividad del turista.
+  3. Acciones de Marketing específicas para cada tipo de turista --> Relevancia
+  4. Conocimiento holístico del turista.
+
+La clave está en utilizar toda la información disponible, que impacta en que un turista decida viajar a un lugar determinado.
 
