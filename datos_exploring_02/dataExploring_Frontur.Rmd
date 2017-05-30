@@ -34,6 +34,8 @@ El período de tiempo que se va a utilizar en el TFM, será desde Abril del 2016
 
 Los ficheros que se van a explorar en este fichero son los relacionados con "Estadística de movimientos turísticos en frontera. Frontur""
 
+En los ficheros de microdatos cada registro representa a un viajero que finaliza su viaje por España en el mes de referencia. La variable que identifica de manera única cada registro es A0_1. Sumando el factor de elevación de cada registro ('Factor') se obtiene la estimación del número de viajeros, que podrá desglosarse en función del resto de variables de clasificación del fichero: turistas-excursionistas, destino principal, país de residencia, vía de acceso y tipo de alojamiento.
+
 
 
 ```{r cargadatos}
