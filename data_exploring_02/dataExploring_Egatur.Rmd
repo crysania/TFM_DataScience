@@ -1,0 +1,180 @@
+---
+title: "dataExploring_Egatur"
+author: "SandradelaFuente"
+date: "30 de mayo de 2017"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 7
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 1
+  pdf_document:
+    toc: yes
+  word_document: default
+---
+
+# Set working directory
+
+```{r setwd, include=FALSE}
+setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
+
+```
+
+# DataExploring
+
+Esta etapa se centra en evaluar la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
+
+Los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
+
+El primer paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE, para poder plantear una solución a partir de los mismos.
+
+El período de tiempo que se va a utilizar en el TFM, será desde Abril del 2016 hasta Marzo del 2017 (12 meses).
+
+Los ficheros que se van a explorar en este fichero son los relacionados con "Encuesta de gasto turístico. Egatur"
+
+Para el TFM se va a utilizar los datos contenidos en los ficheros elevado_eg_mod_web_tur_XXXX.txt, se obvian los datos de los ficheros etapas_eg_mod_web_XXXX.txt
+
+En cada fichero cada registro representa a un viajero que finaliza su viaje por España en el mes de referencia.
+
+La variable que identifica de manera única cada registro es A0_1.
+
+Para estimar el gasto turístico debe utilizarse la variable 'gastototal' multiplicada por el factor de elevación de cada registro ('Factor_Egatur'). 
+
+El gasto medio por persona, se obtendrá como el cociente del gasto turístico entre los turistas, calculados sumando la variable 'Factor_Egatur'.
+
+La estimación de las pernoctaciones, resultante de multiplicar la variable 'A13' por 'Factor_Egatur', se utiliza como denominador del gasto medio diario, siendo el numerador el gasto turístico.
+
+Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas.
+
+
+
+```{r cargadatos}
+
+egatur0117=read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0117.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0217 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0217.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0317 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0317.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0416 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0416.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0516 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0516.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0616 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0616.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0716 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0716.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0816 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0816.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0916 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0916.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur1016 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1016.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur1116 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1116.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur1216 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1216.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+
+#se crea una columna con el mes de cada fichero
+
+egatur0117$Mes<-01
+egatur0217$Mes<-02
+egatur0317$Mes<-03
+egatur0416$Mes<-04
+egatur0516$Mes<-05
+egatur0616$Mes<-06
+egatur0716$Mes<-07
+egatur0816$Mes<-08
+egatur0916$Mes<-09
+egatur1016$Mes<-10
+egatur1116$Mes<-11
+egatur1216$Mes<-12
+
+```
+
+
+Se van a unificar todos los datos de los ficheros en un unico DataSet
+
+
+```{r crear DataSet}
+
+dsEgatur<-rbind(egatur0117,egatur0217,egatur0317,egatur0416,egatur0516,egatur0616,egatur0716,egatur0816,egatur0916,egatur1016,egatur1116,egatur1216)
+
+head(dsEgatur)
+
+```
+
+
+
+
+Se modifican los nombres de las columnas
+
+```{r nombre columnas}
+colnames(dsEgatur)[colnames(dsEgatur)=="A0"] <- "Encuesta"
+colnames(dsEgatur)[colnames(dsEgatur)=="A0_1"] <- "Id"
+colnames(dsEgatur)[colnames(dsEgatur)=="A0_7"] <- "Tipo_Viajero"
+colnames(dsEgatur)[colnames(dsEgatur)=="A1"] <- "Via_Salida"
+colnames(dsEgatur)[colnames(dsEgatur)=="pais"] <- "Pais"
+colnames(dsEgatur)[colnames(dsEgatur)=="ccaa"] <- "Destino_CCAA"
+colnames(dsEgatur)[colnames(dsEgatur)=="A13"] <- "Pernoctaciones"
+colnames(dsEgatur)[colnames(dsEgatur)=="aloja"] <- "Alojamiento"
+colnames(dsEgatur)[colnames(dsEgatur)=="motivo"] <- "Motivo"
+colnames(dsEgatur)[colnames(dsEgatur)=="A16"] <- "Paquete_Turistico"
+colnames(dsEgatur)[colnames(dsEgatur)=="gastototal"] <- "Gasto_Total"
+colnames(dsEgatur)[colnames(dsEgatur)=="factoregatur"] <- "Viajeros"
+
+
+head(dsEgatur)
+
+```
+
+Eliminamos las columnas que no nos interesan en este caso mm_aaaa, Encuesta e Id
+
+
+```{r eliminar columnas}
+
+dsEgatur$mm_aaaa <- NULL
+dsEgatur$Encuesta <- NULL
+dsEgatur$Id <- NULL
+
+head(dsEgatur)
+
+```
+
+
+
+Se formatea los datos a los tipos adecuados
+
+
+```{r data format}
+
+dsEgatur$Tipo_Viajero<-as.numeric(dsEgatur$Tipo_Viajero)
+dsEgatur$Via_Salida<-as.numeric(dsEgatur$Via_Salida)
+dsEgatur$Paquete_Turistico<-as.numeric(dsEgatur$Paquete_Turistico)
+
+dsEgatur$Pais<-as.factor(dsEgatur$Pais)
+dsEgatur$Destino_CCAA<-as.factor(dsEgatur$Destino_CCAA)
+dsEgatur$Alojamiento<-as.factor(dsEgatur$Alojamiento)
+dsEgatur$Motivo<-as.factor(dsEgatur$Motivo)
+dsEgatur$Pernoctaciones<-as.factor(dsEgatur$Pernoctaciones)
+dsEgatur$Mes<-as.factor(dsEgatur$Mes)
+
+dsEgatur$Viajeros<-as.numeric(dsEgatur$Viajeros)
+dsEgatur$Gasto_Total<-as.numeric(dsEgatur$Gasto_Total)
+
+head(dsEgatur)
+
+```
+
+
+Se genera un fichero en formato csv con los datos del dataset
+
+
+```{r file csv}
+
+write.csv(dsEgatur,file="Egatur.csv",row.names = FALSE )
+
+
+```

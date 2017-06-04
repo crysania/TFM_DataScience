@@ -1,0 +1,163 @@
+---
+title: "dataExploring_Frontur"
+author: "SandradelaFuente"
+date: "30 de mayo de 2017"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 7
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 1
+  pdf_document:
+    toc: yes
+  word_document: default
+---
+
+# Set working directory
+
+```{r setwd, include=FALSE}
+setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
+
+```
+
+# DataExploring
+
+Esta etapa se centra en evaluar la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
+
+Los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
+
+El primer paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE, para poder plantear una solución a partir de los mismos.
+
+El período de tiempo que se va a utilizar en el TFM, será desde Abril del 2016 hasta Marzo del 2017 (12 meses).
+
+Los ficheros que se van a explorar en este fichero son los relacionados con "Estadística de movimientos turísticos en frontera. Frontur""
+
+En los ficheros de microdatos cada registro representa a un viajero que finaliza su viaje por España en el mes de referencia. La variable que identifica de manera única cada registro es A0_1. Sumando el factor de elevación de cada registro ('Factor') se obtiene la estimación del número de viajeros, que podrá desglosarse en función del resto de variables de clasificación del fichero: turistas-excursionistas, destino principal, país de residencia, vía de acceso y tipo de alojamiento.
+
+
+
+```{r cargadatos}
+
+frontur0117=read.table('../data_01/Frontur/datos_frontur0117.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0217 <- read.table('../data_01/Frontur/datos_frontur0217.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0317 <- read.table('../data_01/Frontur/datos_frontur0317.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0416 <- read.table('../data_01/Frontur/datos_frontur0416.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0516 <- read.table('../data_01/Frontur/datos_frontur0516.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0616 <- read.table('../data_01/Frontur/datos_frontur0616.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0716 <- read.table('../data_01/Frontur/datos_frontur0716.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0816 <- read.table('../data_01/Frontur/datos_frontur0816.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0916 <- read.table('../data_01/Frontur/datos_frontur0916.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur1016 <- read.table('../data_01/Frontur/datos_frontur1016.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur1116 <- read.table('../data_01/Frontur/datos_frontur1116.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur1216 <- read.table('../data_01/Frontur/datos_frontur1216.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+#se crea una columna con el mes de cada fichero
+
+frontur0117$Mes<-01
+frontur0217$Mes<-02
+frontur0317$Mes<-03
+frontur0416$Mes<-04
+frontur0516$Mes<-05
+frontur0616$Mes<-06
+frontur0716$Mes<-07
+frontur0816$Mes<-08
+frontur0916$Mes<-09
+frontur1016$Mes<-10
+frontur1116$Mes<-11
+frontur1216$Mes<-12
+```
+
+
+Se van a unificar todos los datos de los ficheros en un unico DataSet
+
+
+```{r crear DataSet}
+
+dsFrontur<-rbind(frontur0117,frontur0217,frontur0317,frontur0416,frontur0516,frontur0616,frontur0716,frontur0816,frontur0916,frontur1016,frontur1116,frontur1216)
+
+head(dsFrontur)
+
+```
+
+
+
+
+Se modifican los nombres de las columnas
+
+```{r nombre columnas}
+colnames(dsFrontur)[colnames(dsFrontur)=="A0"] <- "Encuesta"
+colnames(dsFrontur)[colnames(dsFrontur)=="A0_1"] <- "Id"
+colnames(dsFrontur)[colnames(dsFrontur)=="A0_7"] <- "Tipo_Viajero"
+colnames(dsFrontur)[colnames(dsFrontur)=="A1"] <- "Via_Entrada"
+colnames(dsFrontur)[colnames(dsFrontur)=="Residencia"] <- "Pais"
+colnames(dsFrontur)[colnames(dsFrontur)=="CCAA"] <- "Destino_CCAA"
+colnames(dsFrontur)[colnames(dsFrontur)=="A14"] <- "Alojamiento"
+colnames(dsFrontur)[colnames(dsFrontur)=="A15"] <- "Motivo"
+colnames(dsFrontur)[colnames(dsFrontur)=="A16"] <- "Paquete_Turistico"
+colnames(dsFrontur)[colnames(dsFrontur)=="A13_1"] <- "Pernoctaciones"
+colnames(dsFrontur)[colnames(dsFrontur)=="Factor"] <- "Viajeros"
+
+
+head(dsFrontur)
+
+
+```
+
+
+Eliminamos las columnas que no nos interesan en este caso Encuesta e Id
+
+
+```{r eliminar columnas}
+
+dsFrontur$Encuesta <- NULL
+dsFrontur$Id <- NULL
+
+head(dsFrontur)
+
+```
+
+Se formatea los datos a los tipos adecuados
+
+
+```{r data format}
+
+dsFrontur$Tipo_Viajero<-as.numeric(dsFrontur$Tipo_Viajero)
+dsFrontur$Via_Entrada<-as.numeric(dsFrontur$Via_Entrada)
+dsFrontur$Paquete_Turistico<-as.numeric(dsFrontur$Paquete_Turistico)
+
+dsFrontur$Pais<-as.factor(dsFrontur$Pais)
+dsFrontur$Destino_CCAA<-as.factor(dsFrontur$Destino_CCAA)
+dsFrontur$Alojamiento<-as.factor(dsFrontur$Alojamiento)
+dsFrontur$Motivo<-as.factor(dsFrontur$Motivo)
+dsFrontur$Pernoctaciones<-as.factor(dsFrontur$Pernoctaciones)
+dsFrontur$Mes<-as.factor(dsFrontur$Mes)
+
+dsFrontur$Viajeros<-as.numeric(dsFrontur$Viajeros)
+
+head(dsFrontur)
+
+```
+
+
+Se genera un fichero en formato csv con los datos del dataset
+
+
+```{r file csv}
+
+write.csv(dsFrontur,file="Frontur.csv",row.names = FALSE)
+
+
+```
