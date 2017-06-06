@@ -15,9 +15,13 @@ output:
   word_document: default
 ---
 
+<br></br>
+
+
 # Set working directory
 
-```{r setwd, include=FALSE}
+
+```{r setwd}
 setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
 
 ```
