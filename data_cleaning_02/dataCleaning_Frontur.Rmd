@@ -1,6 +1,6 @@
 ---
-title: "dataExploring_Frontur"
-author: "SandradelaFuente"
+title: "Limpieza de datos para Frontur"
+author: "Sandra de la Fuente"
 date: "30 de mayo de 2017"
 output:
   html_document:
@@ -24,20 +24,20 @@ setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
 
 ```
 
-# DataExploring
+# DataCleaning
 
-Esta etapa se centra en evaluar la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
 
-Los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
+En este script se realiza la integración de datos, se enfoca a la combinación de múltiples ficheros de registros para crear nuevos, uniendo datos sobre un mismo objeto que se encuentran dispersos en diferentes fuentes.
 
-El primer paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE, para poder plantear una solución a partir de los mismos.
+Además se produce la selección de datos, es decir, la decisión sobre los datos a emplear en el análisis, usando criterios relativos a la relevancia para los objetivos, la calidad de los datos o restricciones técnicas. 
 
-El período de tiempo que se va a utilizar en el TFM, será desde Abril del 2016 hasta Marzo del 2017 (12 meses).
+Esta selección a realizar se refiere tanto a los atributos o campos de los registros de los ficheros, como a los registros en sí.
 
-Los ficheros que se van a explorar en este fichero son los relacionados con "Estadística de movimientos turísticos en frontera. Frontur""
+A continuación se realiza la limpieza de datos, que consiste en “elevar” el nivel de calidad de los datos al requerido por las técnicas de análisis. 
 
-En los ficheros de microdatos cada registro representa a un viajero que finaliza su viaje por España en el mes de referencia. La variable que identifica de manera única cada registro es A0_1. Sumando el factor de elevación de cada registro ('Factor') se obtiene la estimación del número de viajeros, que podrá desglosarse en función del resto de variables de clasificación del fichero: turistas-excursionistas, destino principal, país de residencia, vía de acceso y tipo de alojamiento.
+Esta tarea incluiría, si fuera necesario, la inserción de valores por defecto adecuados, o el uso de modelado para estimar los valores ausentes (missing values). 
 
+Los ficheros que se van a limpiar en este script son los relacionados con "Estadística de movimientos turísticos en frontera. Frontur""
 
 
 ```{r cargadatos}

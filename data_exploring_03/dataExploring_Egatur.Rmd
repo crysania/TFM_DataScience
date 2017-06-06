@@ -1,0 +1,63 @@
+---
+title: "Exploracion de los datos en Egatur.csv"
+author: "SandradelaFuente"
+date: "30 de mayo de 2017"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 7
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 1
+  pdf_document:
+    toc: yes
+  word_document: default
+---
+<br></br>
+
+
+# Set working directory
+
+```{r setwd}
+setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
+
+```
+
+# DataExploring
+
+ 
+# DataExploring
+
+El segundo paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE, para poder plantear una solución a partir de los mismos.
+
+En esta fase se procede a la construcción de datos, a partir de los datos originalmente capturados, se generan si es necesario, atributos derivados, nuevos registros o valores transformados de atributos existentes, en función de los requerimientos para preparar la entrada a las herramientas de modelado.
+
+Los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
+
+Se podrá dar formato a datos, estas transformaciones se refieren a modificaciones sintácticas que se hacen sobre los datos, sin alterar su significado pero que pueden ser requeridas por la herramienta de modelado a utilizar. Por ejemplo, puede que haya requisitos en el orden de los atributos, o que la herramienta de modelado requiera que los registros estén ordenados según el atributo resultado. 
+
+Esta etapa se centra en evaluar la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
+
+El período de tiempo que se va a utilizar en el TFM, será desde Abril del 2016 hasta Marzo del 2017 (12 meses).
+
+En cada fichero cada registro representa a un viajero que finaliza su viaje por España en el mes de referencia
+
+La variable que identifica de manera única cada registro es A0_1.
+
+Para estimar el gasto turístico debe utilizarse la variable ‘gastototal’ multiplicada por el factor de elevación de cada registro (‘Factor_Egatur’).
+
+El gasto medio por persona, se obtendrá como el cociente del gasto turístico entre los turistas, calculados sumando la variable ‘Factor_Egatur’.
+
+La estimación de las pernoctaciones, resultante de multiplicar la variable ‘A13’ por ‘Factor_Egatur’, se utiliza como denominador del gasto medio diario, siendo el numerador el gasto turístico.
+
+Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas.
+
+
+
+```{r leer datos de Egatur.csv}
+
+
+
+
+```
