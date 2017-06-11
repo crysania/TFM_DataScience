@@ -17,18 +17,28 @@ output:
 <br></br>
 
 
-# Set working directory
+# Se establece el directorio de trabajo y las librerías necesarias
 
-```{r setwd}
-setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
+```{r setwd y librerias,message=FALSE, warning=FALSE, include=FALSE}
+
+#Limpiamos el workspace
+rm(list=ls())
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("dplyr","ggplot2", "reshape2","rgdal","RColorBrewer","ggmap",
+               "scales","party","class","gdata","tseries")
+
+setwd("~/Desktop/TFM_Master/TFM_DataScience/")
 
 ```
 
+
 # DataExploring
 
-El segundo paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE, para poder plantear una solución a partir de los mismos.
+El segundo paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE, para poder plantear una solución a partir de los mismos, mediante una transformación de los datos para adecuarlo al problema de modelado que se quiere resolver y los primeros análisis que permitan conocer el contenido de los datos.
 
 En esta fase se procede a la construcción de datos, a partir de los datos originalmente capturados, se generan si es necesario, atributos derivados, nuevos registros o valores transformados de atributos existentes, en función de los requerimientos para preparar la entrada a las herramientas de modelado.
+
 
 Los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
 
@@ -44,9 +54,141 @@ La variable que identifica de manera única cada registro es A0_1. Sumando el fa
 
 
 
-```{r leer datos de Frontur.csv}
+```{r  Bloque de carga de datos Frontur.csv}
 
-
+dsFrontur=read.csv("../data_cleaning_02/Frontur.csv",stringsAsFactors = FALSE)
 
 
 ```
+# DataFormat
+
+Se formatea los datos a los tipos adecuados:
+  1. Tipos numéricos (Tipo_Viajero, Paquete_Turistico y Viajeros)
+  2. Tipos Categóricos (Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Pernoctaciones y Mes)
+
+
+```{r data format}
+
+dsFrontur$Tipo_Viajero<-as.numeric(dsFrontur$Tipo_Viajero)
+dsFrontur$Paquete_Turistico<-as.numeric(dsFrontur$Paquete_Turistico)
+dsFrontur$Viajeros<-as.numeric(dsFrontur$Viajeros)
+
+dsFrontur$Via_Entrada<-as.factor(dsFrontur$Via_Entrada)
+dsFrontur$Pais<-as.factor(dsFrontur$Pais)
+dsFrontur$Destino_CCAA<-as.factor(dsFrontur$Destino_CCAA)
+dsFrontur$Alojamiento<-as.factor(dsFrontur$Alojamiento)
+dsFrontur$Motivo<-as.factor(dsFrontur$Motivo)
+dsFrontur$Pernoctaciones<-as.factor(dsFrontur$Pernoctaciones)
+dsFrontur$Mes<-as.factor(dsFrontur$Mes)
+
+head(dsFrontur)
+
+```
+
+
+# DataReview
+
+En este bloque se realiza una revisión de los datos para detectar. 
+
+```{r Bloque de revisión basica del dataset}
+
+head(dsFrontur)
+tail(dsFrontur)
+nrow(dsFrontur)
+ncol(dsFrontur)
+str(dsFrontur)
+
+```
+
+
+Se procede a comparar los datos obtenidos del dataset, con la documentacion del INE (fichero Diseño_Frontur_OpenData.xlsx en data_01\Frontur), para detectar posibles datos nulos, outliers o erróneos.
+
+Se detecta que los levels de las columnas (Pais, Destino y Motivo), no coinciden con los de la documentación, por lo que se revisarán cada uno por separado.
+
+
+
+```{r Bloque de revisión estadistica del dataset}
+
+new_df <- dsFrontur$Pais
+new_df    
+```
+Se detecta que no tiene el valor 3 que corresponde con España, por lo tanto es correcto que solo haya 15 valores.
+
+
+```{r Bloque de revisión estadistica del dataset}
+
+new_df <- dsFrontur$Destino_CCAA
+new_df    
+```
+
+No aparece Melilla (código = 19) como Destino principal del viaje, en cambio, como dato curioso Ceuta sí que aparece.
+
+
+```{r Bloque de revisión estadistica del dataset}
+
+new_df <- dsFrontur$Motivo
+new_df
+
+```
+
+En el caso de los motivos del viaje, se detecta que el valor 0 que significa "no procede" no aparece nunca.
+
+
+
+# Valores perdidos & imposibles 
+
+
+El tratamiento de datos perdidos, más conocidos como missing es fundamental para la correcta interpretación de un análisis.
+
+- valores imposibles, se representan por el código: NaN (Not a Number).
+
+- valores perdidos, simplemente hemos perdido algún dato y no sabemos qué valor toma) por el código: NA (Not available).
+
+Hay muchas funciones para identificar estos valores, la más usada es is.na().
+
+En este dataset no existen valores NaN ni NA.
+
+
+```{r  is.na() }
+
+is.na( dsFrontur )
+
+
+```
+
+
+```{r Bloque de revisión estadistica del dataset}
+
+summary(dsFrontur)
+
+```
+De estos datos se pueden obtener mucha información:
+
+
+
+Total de turistas que vienen a España
+
+```{r Bloque total turistas}
+
+Turistas_Anuales =summarise(dsFrontur, Turistas_Anuales=sum(dsFrontur$Viajeros))
+Turistas_Anuales
+
+```
+
+Turistas mensuales que vienen a España
+
+```{r Bloque turistas mensuales que vienen a España}
+
+byDate <- group_by(SALES, Date)
+
+mensual_turista <- summarise(dsFrontur&Mes, Mean=mean(dsFrontur$Viajeros), SD=sd(dsFrontur$Viajeros), Total=Turistas_Anuales)
+
+ggplot(mensual_turista, aes(dsFrontur&Mes, Turistas_Anuales)) + geom_line(color = "red") + scale_x_date(labels=date_format("%m/%b")) + xlab("") + ylab("Turistas mensuales")
+
+
+
+
+
+``` 
+
+

@@ -18,28 +18,30 @@ output:
 <br></br>
 
 
-# Set working directory
+# Se establece el directorio de trabajo
+
+```{r setwd y librerias}
+
+#Limpiamos el workspace
+rm(list=ls())
 
 
-```{r setwd}
 setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
 
 ```
 
-# DataCleaning
+# Limpieza e integración de los datos
 
 
-En este script se realiza la integración de datos, se enfoca a la combinación de múltiples ficheros de registros para crear nuevos, uniendo datos sobre un mismo objeto que se encuentran dispersos en diferentes fuentes.
+En este script se realiza la limpieza e integración de datos, se enfoca a la combinación de múltiples ficheros de registros, para crear nuevos, con el objetivo final de unir los datos sobre un mismo fichero csv.
 
-Además se produce la selección de datos, es decir, la decisión sobre los datos a emplear en el análisis, usando criterios relativos a la relevancia para los objetivos, la calidad de los datos o restricciones técnicas. 
+Se produce la limpieza de datos, es decir, la decisión sobre qué datos se van a emplear en el análisis, usando criterios relativos a la relevancia para los objetivos, la calidad de los mismos o restricciones técnicas por las técnicas de análisis. 
 
-Esta selección a realizar se refiere tanto a los atributos o campos de los registros de los ficheros, como a los registros en sí.
+Esta selección a realizar se refiere tanto a los atributos o campos de los registros en los ficheros, como a los registros en sí.
 
-A continuación se realiza la limpieza de datos, que consiste en “elevar” el nivel de calidad de los datos al requerido por las técnicas de análisis. 
+Esta tarea incluiría, si fuera necesario, la inserción de valores por defecto adecuados o el uso de modelado para estimar los valores ausentes (missing values). 
 
-Esta tarea incluiría, si fuera necesario, la inserción de valores por defecto adecuados, o el uso de modelado para estimar los valores ausentes (missing values). 
-
-Los ficheros que se van a limpiar en este script son los relacionados con “Encuesta de gasto turístico. Egatu
+Los ficheros que se van a limpiar en este script son los relacionados con “Encuesta de gasto turístico. Egatur
 
 Para el TFM se va a utilizar los datos contenidos en los ficheros elevado_eg_mod_web_tur_XXXX.txt, se obvian los datos de los ficheros etapas_eg_mod_web_XXXX.txt
 
@@ -88,7 +90,7 @@ egatur1216$Mes<-12
 ```
 
 
-Se van a unificar todos los datos de los ficheros en un unico DataSet
+Se van a unificar todos los datos de los ficheros en un unico DataSet.
 
 
 ```{r crear DataSet}
@@ -102,7 +104,7 @@ head(dsEgatur)
 
 
 
-Se modifican los nombres de las columnas
+Se modifican los nombres de las columnas.
 
 ```{r nombre columnas}
 colnames(dsEgatur)[colnames(dsEgatur)=="A0"] <- "Encuesta"
@@ -123,7 +125,7 @@ head(dsEgatur)
 
 ```
 
-Eliminamos las columnas que no nos interesan en este caso mm_aaaa, Encuesta e Id
+Eliminamos las columnas que no nos interesan en este caso mm_aaaa, Encuesta e Id.
 
 
 ```{r eliminar columnas}
@@ -137,32 +139,34 @@ head(dsEgatur)
 ```
 
 
-
-Se formatea los datos a los tipos adecuados
+Se formatea los datos a los tipos adecuados:
+  1. Tipos numéricos (Tipo_Viajero, Viajeros y Gasto_Total)
+  2. Tipos Categóricos (Via_Salida, Pais, Destino_CCAA, Pernoctaciones, Alojamiento, Motivo, Paquete_Turistico y Mes)
 
 
 ```{r data format}
 
 dsEgatur$Tipo_Viajero<-as.numeric(dsEgatur$Tipo_Viajero)
-dsEgatur$Via_Salida<-as.numeric(dsEgatur$Via_Salida)
-dsEgatur$Paquete_Turistico<-as.numeric(dsEgatur$Paquete_Turistico)
-
-dsEgatur$Pais<-as.factor(dsEgatur$Pais)
-dsEgatur$Destino_CCAA<-as.factor(dsEgatur$Destino_CCAA)
-dsEgatur$Alojamiento<-as.factor(dsEgatur$Alojamiento)
-dsEgatur$Motivo<-as.factor(dsEgatur$Motivo)
-dsEgatur$Pernoctaciones<-as.factor(dsEgatur$Pernoctaciones)
-dsEgatur$Mes<-as.factor(dsEgatur$Mes)
-
 dsEgatur$Viajeros<-as.numeric(dsEgatur$Viajeros)
 dsEgatur$Gasto_Total<-as.numeric(dsEgatur$Gasto_Total)
+
+dsEgatur$Via_Salida<-as.factor(dsEgatur$Via_Salida)
+dsEgatur$Pais<-as.factor(dsEgatur$Pais)
+dsEgatur$Destino_CCAA<-as.factor(dsEgatur$Destino_CCAA)
+dsEgatur$Pernoctaciones<-as.factor(dsEgatur$Pernoctaciones)
+dsEgatur$Alojamiento<-as.factor(dsEgatur$Alojamiento)
+dsEgatur$Motivo<-as.factor(dsEgatur$Motivo)
+dsEgatur$Paquete_Turistico<-as.factor(dsEgatur$Paquete_Turistico)
+dsEgatur$Mes<-as.factor(dsEgatur$Mes)
+
+
 
 head(dsEgatur)
 
 ```
 
 
-Se genera un fichero en formato csv con los datos del dataset
+Se genera un fichero en formato csv con los datos del dataset.
 
 
 ```{r file csv}
