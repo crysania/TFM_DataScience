@@ -19,7 +19,12 @@ output:
 
 # Se establece el directorio de trabajo y las librerías necesarias
 
-```{r setwd y librerias,message=FALSE, warning=FALSE, include=FALSE}
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+
+```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
 
 #Limpiamos el workspace
 rm(list=ls())
@@ -60,7 +65,7 @@ La variable que identifica de manera única cada registro es A0_1. Sumando el fa
 ```{r  Bloque de carga de datos Frontur.csv}
 
 df_Frontur <- read.table("../data_cleaning_02/Frontur.csv", header = T, sep = ",")
-df_Frontur
+head(df_Frontur)
 
 df_Paises <- read.table("../data_01/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
 df_Paises
@@ -92,6 +97,8 @@ df_Frontur$Mes<-as.factor(df_Frontur$Mes)
 
 head(df_Frontur)
 
+df_Paises$Pais<-as.factor(df_Paises$Pais)
+
 ```
 
 
@@ -116,7 +123,7 @@ Se detecta que los levels de las columnas (Pais, Destino y Motivo), no coinciden
 
 
 
-```{r Bloque de revision estadistica del dataset}
+```{r Bloque estudio estadistico del dataset}
 
 new_df <- df_Frontur$Pais
 head(new_df)    
@@ -124,7 +131,7 @@ head(new_df)
 Se detecta que no tiene el valor 3 que corresponde con España, por lo tanto es correcto que solo haya 15 valores.
 
 
-```{r Bloque de revision estadistica del dataset}
+```{r }
 
 new_df <- df_Frontur$Destino_CCAA
 head(new_df)      
@@ -133,7 +140,7 @@ head(new_df)
 No aparece Melilla (código = 19) como Destino principal del viaje, en cambio, como dato curioso Ceuta sí que aparece.
 
 
-```{r Bloque de revision estadistica del dataset}
+```{r }
 
 new_df <- df_Frontur$Motivo
 head(new_df) 
@@ -160,7 +167,9 @@ sapply(df_Frontur,function(x) sum(is.na(x)))
 ```
 
 
-```{r Bloque de revision estadistica del dataset}
+# Análisis descriptivo de los datos
+
+```{r Bloque estadistica del dataset}
 
 summary(df_Frontur)
 
@@ -197,7 +206,7 @@ Francia es el principal país de residencia con  32.209.639 turistas durante el 
 
 Reino Unido y Alemania son los siguientes países de residencia con más turistas que visitan España.
 
-```{r Bloque para representar las graficas}
+```{r Bloque para representar datos}
 
 df_merge<-df_merge[order(df_merge$Total,decreasing=T),]
 
