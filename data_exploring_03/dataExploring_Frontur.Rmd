@@ -24,25 +24,28 @@ output:
 #Limpiamos el workspace
 rm(list=ls())
 
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load("dplyr","ggplot2", "reshape2","rgdal","RColorBrewer","ggmap",
-               "scales","party","class","gdata","tseries")
+setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
 
-setwd("~/Desktop/TFM_Master/TFM_DataScience/")
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+
 
 ```
 
 
-# DataExploring
+# Exploración de los datos
 
-El segundo paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE, para poder plantear una solución a partir de los mismos, mediante una transformación de los datos para adecuarlo al problema de modelado que se quiere resolver y los primeros análisis que permitan conocer el contenido de los datos.
+El segundo paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE para poder plantear una solución a partir de los mismos, mediante una transformación de los datos para adecuarlo al problema de modelado que se quiere resolver.
 
-En esta fase se procede a la construcción de datos, a partir de los datos originalmente capturados, se generan si es necesario, atributos derivados, nuevos registros o valores transformados de atributos existentes, en función de los requerimientos para preparar la entrada a las herramientas de modelado.
+En esta fase se procede, a partir del fichero csv de la etapa anterior "data_Cleaning", a la generación de nuevos registros o valores transformados de atributos existentes si fuera necesario, en función de los requerimientos para preparar la entrada a las herramientas de modelado.
 
+Cabe recordar que los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
 
-Los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
+Se procede a dar formato a datos, estas transformaciones se refieren a modificaciones sintácticas que se hacen sobre los datos, sin alterar su significado pero que pueden ser requeridas por la herramienta de modelado a utilizar.
 
-Se podrá dar formato a datos, estas transformaciones se refieren a modificaciones sintácticas que se hacen sobre los datos, sin alterar su significado pero que pueden ser requeridas por la herramienta de modelado a utilizar. Por ejemplo, puede que haya requisitos en el orden de los atributos, o que la herramienta de modelado requiera que los registros estén ordenados según el atributo resultado. 
+Por ejemplo, puede que haya requisitos en el orden de los atributos, o que la herramienta de modelado requiera que los registros estén ordenados según el atributo resultado. 
 
 Esta etapa se centra en evaluar la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
 
@@ -56,11 +59,17 @@ La variable que identifica de manera única cada registro es A0_1. Sumando el fa
 
 ```{r  Bloque de carga de datos Frontur.csv}
 
-dsFrontur=read.csv("../data_cleaning_02/Frontur.csv",stringsAsFactors = FALSE)
+df_Frontur <- read.table("../data_cleaning_02/Frontur.csv", header = T, sep = ",")
+df_Frontur
 
+df_Paises <- read.table("../data_01/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
+df_Paises
+
+df_CCAA <- read.table("../data_01/CCAA.csv", header = T, sep = ";",  fileEncoding="utf-8")
+df_CCAA
 
 ```
-# DataFormat
+# Formateo de los datos
 
 Se formatea los datos a los tipos adecuados:
   1. Tipos numéricos (Tipo_Viajero, Paquete_Turistico y Viajeros)
@@ -69,126 +78,147 @@ Se formatea los datos a los tipos adecuados:
 
 ```{r data format}
 
-dsFrontur$Tipo_Viajero<-as.numeric(dsFrontur$Tipo_Viajero)
-dsFrontur$Paquete_Turistico<-as.numeric(dsFrontur$Paquete_Turistico)
-dsFrontur$Viajeros<-as.numeric(dsFrontur$Viajeros)
+df_Frontur$Tipo_Viajero<-as.numeric(df_Frontur$Tipo_Viajero)
+df_Frontur$Paquete_Turistico<-as.numeric(df_Frontur$Paquete_Turistico)
+df_Frontur$Viajeros<-as.numeric(df_Frontur$Viajeros)
 
-dsFrontur$Via_Entrada<-as.factor(dsFrontur$Via_Entrada)
-dsFrontur$Pais<-as.factor(dsFrontur$Pais)
-dsFrontur$Destino_CCAA<-as.factor(dsFrontur$Destino_CCAA)
-dsFrontur$Alojamiento<-as.factor(dsFrontur$Alojamiento)
-dsFrontur$Motivo<-as.factor(dsFrontur$Motivo)
-dsFrontur$Pernoctaciones<-as.factor(dsFrontur$Pernoctaciones)
-dsFrontur$Mes<-as.factor(dsFrontur$Mes)
+df_Frontur$Via_Entrada<-as.factor(df_Frontur$Via_Entrada)
+df_Frontur$Pais<-as.factor(df_Frontur$Pais)
+df_Frontur$Destino_CCAA<-as.factor(df_Frontur$Destino_CCAA)
+df_Frontur$Alojamiento<-as.factor(df_Frontur$Alojamiento)
+df_Frontur$Motivo<-as.factor(df_Frontur$Motivo)
+df_Frontur$Pernoctaciones<-as.factor(df_Frontur$Pernoctaciones)
+df_Frontur$Mes<-as.factor(df_Frontur$Mes)
 
-head(dsFrontur)
+head(df_Frontur)
 
 ```
 
 
-# DataReview
+# Revisión de los datos del fichero csv
 
 En este bloque se realiza una revisión de los datos para detectar. 
 
 ```{r Bloque de revisión basica del dataset}
 
-head(dsFrontur)
-tail(dsFrontur)
-nrow(dsFrontur)
-ncol(dsFrontur)
-str(dsFrontur)
+head(df_Frontur)
+tail(df_Frontur)
+nrow(df_Frontur)
+ncol(df_Frontur)
+str(df_Frontur)
 
 ```
 
 
-Se procede a comparar los datos obtenidos del dataset, con la documentacion del INE (fichero Diseño_Frontur_OpenData.xlsx en data_01\Frontur), para detectar posibles datos nulos, outliers o erróneos.
+Se procede a comparar los datos obtenidos del dataset, con la documentacion del INE (fichero /data_01/Frontur/Diseño_Frontur_OpenData.xlsx en ), para detectar posibles datos nulos, outliers o datos erróneos.
 
-Se detecta que los levels de las columnas (Pais, Destino y Motivo), no coinciden con los de la documentación, por lo que se revisarán cada uno por separado.
+Se detecta que los levels de las columnas (Pais, Destino y Motivo), no coinciden con los de la documentación, por lo que se procede a la revisión de los mismos.
 
 
 
-```{r Bloque de revisión estadistica del dataset}
+```{r Bloque de revision estadistica del dataset}
 
-new_df <- dsFrontur$Pais
-new_df    
+new_df <- df_Frontur$Pais
+head(new_df)    
 ```
 Se detecta que no tiene el valor 3 que corresponde con España, por lo tanto es correcto que solo haya 15 valores.
 
 
-```{r Bloque de revisión estadistica del dataset}
+```{r Bloque de revision estadistica del dataset}
 
-new_df <- dsFrontur$Destino_CCAA
-new_df    
+new_df <- df_Frontur$Destino_CCAA
+head(new_df)      
 ```
 
 No aparece Melilla (código = 19) como Destino principal del viaje, en cambio, como dato curioso Ceuta sí que aparece.
 
 
-```{r Bloque de revisión estadistica del dataset}
+```{r Bloque de revision estadistica del dataset}
 
-new_df <- dsFrontur$Motivo
-new_df
+new_df <- df_Frontur$Motivo
+head(new_df) 
 
 ```
 
-En el caso de los motivos del viaje, se detecta que el valor 0 que significa "no procede" no aparece nunca.
+En el caso de los motivos del viaje, se detecta que el valor 0 que significa "no procede" no aparece en ningún registro del dataset.
 
 
 
 # Valores perdidos & imposibles 
 
 
-El tratamiento de datos perdidos, más conocidos como missing es fundamental para la correcta interpretación de un análisis.
+El tratamiento de los datos es fundamental para la correcta interpretación de un análisis, los valores perdidos son aquellos que simplemente se ha perdido algún dato y no sabemos qué valor toma, se representa por el código: NA (Not available).
 
-- valores imposibles, se representan por el código: NaN (Not a Number).
-
-- valores perdidos, simplemente hemos perdido algún dato y no sabemos qué valor toma) por el código: NA (Not available).
-
-Hay muchas funciones para identificar estos valores, la más usada es is.na().
-
-En este dataset no existen valores NaN ni NA.
+Hay muchas funciones para identificar estos valores, la más usada es is.na(), en este dataset no existen valores NaN ni NA.
 
 
 ```{r  is.na() }
 
-is.na( dsFrontur )
+sapply(df_Frontur,function(x) sum(is.na(x)))
 
 
 ```
 
 
-```{r Bloque de revisión estadistica del dataset}
+```{r Bloque de revision estadistica del dataset}
 
-summary(dsFrontur)
+summary(df_Frontur)
 
 ```
-De estos datos se pueden obtener mucha información:
 
 
-
-Total de turistas que vienen a España
+Total de turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017, son 115.913.282 y de media 179.6601
 
 ```{r Bloque total turistas}
 
-Turistas_Anuales =summarise(dsFrontur, Turistas_Anuales=sum(dsFrontur$Viajeros))
-Turistas_Anuales
+summarize(df_Frontur, total = sum(df_Frontur$Viajeros, na.rm = T), media = mean(df_Frontur$Viajeros, na.rm = T))
+
 
 ```
 
-Turistas mensuales que vienen a España
+Llegada de turistas internacionales por país de residencia, porcentaje respecto al total.
 
 ```{r Bloque turistas mensuales que vienen a España}
 
-byDate <- group_by(SALES, Date)
+res <- ddply(df_Frontur, .(Pais), summarize, Total = sum(Viajeros))
 
-mensual_turista <- summarise(dsFrontur&Mes, Mean=mean(dsFrontur$Viajeros), SD=sd(dsFrontur$Viajeros), Total=Turistas_Anuales)
+res2 <- ddply(res, .(Pais, Total), transform, pct= 100 * Total / sum(df_Frontur$Viajeros))
+res2
 
-ggplot(mensual_turista, aes(dsFrontur&Mes, Turistas_Anuales)) + geom_line(color = "red") + scale_x_date(labels=date_format("%m/%b")) + xlab("") + ylab("Turistas mensuales")
-
-
-
+df_merge  <- inner_join(res2,df_Paises)
+df_merge
 
 
 ``` 
+
+Se va a representar de forma gráfica con un diagrama de barras, la llegada de turistas internacionales por país de residencia en porcentajes al total.
+
+Francia es el principal país de residencia con  32.209.639 turistas durante el periodo de estudio, lo que representa el 27 % del total.
+
+Reino Unido y Alemania son los siguientes países de residencia con más turistas que visitan España.
+
+```{r Bloque para representar las graficas}
+
+df_merge<-df_merge[order(df_merge$Total,decreasing=T),]
+
+df_merge
+
+``` 
+
+
+```{r Bloque para representar las graficas}
+
+ggplot(data=df_merge, aes(y=pct, x=Nombre)) +
+  geom_bar(stat="identity", fill="steelblue",  width=0.9) +
+   labs(x = "Paises de residencia", y = "Porcentaje de turistas")+
+  coord_flip() +
+  geom_text(aes(label=pct), vjust=0.7, color="white", size=2)+
+  theme_minimal()
+
+   
+
+
+``` 
+
 
 
