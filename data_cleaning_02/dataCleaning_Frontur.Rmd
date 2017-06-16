@@ -3,8 +3,6 @@ title: "Limpieza de datos para Frontur"
 author: "Sandra de la Fuente"
 date: "30 de mayo de 2017"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     fig_height: 5
     fig_width: 7
@@ -12,7 +10,7 @@ output:
     theme: journal
     toc: yes
     toc_depth: 1
-  word_document: default
+ 
 ---
 <br></br>
 
@@ -40,7 +38,7 @@ Esta selección a realizar se refiere tanto a los atributos o campos de los regi
 
 Esta tarea incluiría, si fuera necesario, la inserción de valores por defecto adecuados o el uso de modelado para estimar los valores ausentes (missing values). 
 
-Los ficheros que se van a limpiar en este script son los relacionados con "Estadística de movimientos turísticos en frontera. Frontur""
+Los ficheros que se van a limpiar en este script son los relacionados con "Estadística de movimientos turísticos en frontera. Frontur"
 
 
 ```{r cargadatos}
@@ -50,6 +48,15 @@ frontur0117=read.table('../data_01/Frontur/datos_frontur0117.txt', sep = ';', co
 frontur0217 <- read.table('../data_01/Frontur/datos_frontur0217.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
 frontur0317 <- read.table('../data_01/Frontur/datos_frontur0317.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0417 <- read.table('../data_01/Frontur/datos_frontur0417.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+
+frontur0116 <- read.table('../data_01/Frontur/datos_frontur0116.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0216 <- read.table('../data_01/Frontur/datos_frontur0216.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur0316 <- read.table('../data_01/Frontur/datos_frontur0316.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
 frontur0416 <- read.table('../data_01/Frontur/datos_frontur0416.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
@@ -69,20 +76,36 @@ frontur1116 <- read.table('../data_01/Frontur/datos_frontur1116.txt', sep = ';',
 
 frontur1216 <- read.table('../data_01/Frontur/datos_frontur1216.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
-#se crea una columna con el mes de cada fichero
 
-frontur0117$Mes<-01
-frontur0217$Mes<-02
-frontur0317$Mes<-03
-frontur0416$Mes<-04
-frontur0516$Mes<-05
-frontur0616$Mes<-06
-frontur0716$Mes<-07
-frontur0816$Mes<-08
-frontur0916$Mes<-09
-frontur1016$Mes<-10
-frontur1116$Mes<-11
-frontur1216$Mes<-12
+frontur1015 <- read.table('../data_01/Frontur/datos_frontur1015.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur1115 <- read.table('../data_01/Frontur/datos_frontur1115.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+frontur1215 <- read.table('../data_01/Frontur/datos_frontur1215.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+#se crea una columna con el mesaño de cada fichero
+
+frontur0117$Fec<-"0117"
+frontur0217$Fec<-"0217"
+frontur0317$Fec<-"0317"
+frontur0417$Fec<-"0417"
+
+frontur0116$Fec<-"0116"
+frontur0216$Fec<-"0216"
+frontur0316$Fec<-"0316"
+frontur0416$Fec<-"0416"
+frontur0516$Fec<-"0516"
+frontur0616$Fec<-"0616"
+frontur0716$Fec<-"0716"
+frontur0816$Fec<-"0816"
+frontur0916$Fec<-"0916"
+frontur1016$Fec<-"1016"
+frontur1116$Fec<-"1116"
+frontur1216$Fec<-"1216"
+
+frontur1015$Fec<-"1015"
+frontur1115$Fec<-"1115"
+frontur1215$Fec<-"1215"
 ```
 
 
@@ -91,7 +114,7 @@ Se van a unificar todos los datos de los ficheros en un unico DataSet.
 
 ```{r crear DataSet}
 
-dsFrontur<-rbind(frontur0117,frontur0217,frontur0317,frontur0416,frontur0516,frontur0616,frontur0716,frontur0816,frontur0916,frontur1016,frontur1116,frontur1216)
+dsFrontur<-rbind(frontur0117,frontur0217,frontur0317,frontur0417,frontur0116,frontur0216,frontur0316,frontur0416,frontur0516,frontur0616,frontur0716,frontur0816,frontur0916,frontur1016,frontur1116,frontur1216,frontur1015,frontur1115,frontur1215)
 
 head(dsFrontur)
 
@@ -122,24 +145,26 @@ head(dsFrontur)
 ```
 
 
-Eliminamos las columnas que no nos interesan en este caso Encuesta e Id.
+Eliminamos las columnas que no nos interesan en este caso Encuesta.
 
 
 ```{r eliminar columnas}
 
 dsFrontur$Encuesta <- NULL
-dsFrontur$Id <- NULL
 
 head(dsFrontur)
 
 ```
 
 Se formatea los datos a los tipos adecuados:
-  1. Tipos numéricos (Tipo_Viajero, Paquete_Turistico y Viajeros)
-  2. Tipos Categóricos (Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Pernoctaciones y Mes)
+  1. Tipos numéricos (Id,Tipo_Viajero, Paquete_Turistico y Viajeros)
+  2. Tipos Categóricos (Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Pernoctaciones y Fec)
+  
+La columna Fec se divide en dos: Mes y Anyo.
 
 
 ```{r data format}
+
 
 dsFrontur$Tipo_Viajero<-as.numeric(dsFrontur$Tipo_Viajero)
 dsFrontur$Paquete_Turistico<-as.numeric(dsFrontur$Paquete_Turistico)
@@ -151,12 +176,24 @@ dsFrontur$Destino_CCAA<-as.factor(dsFrontur$Destino_CCAA)
 dsFrontur$Alojamiento<-as.factor(dsFrontur$Alojamiento)
 dsFrontur$Motivo<-as.factor(dsFrontur$Motivo)
 dsFrontur$Pernoctaciones<-as.factor(dsFrontur$Pernoctaciones)
-dsFrontur$Mes<-as.factor(dsFrontur$Mes)
+dsFrontur$Mes<-as.factor(substr(dsFrontur$Fec,1,2))
+dsFrontur$Anyo<-as.factor(substr(dsFrontur$Fec,3,4))
 
 head(dsFrontur)
 
 ```
 
+
+Una vez que se genera las dos nuevas columnas con el mes y el año, se elimina la columna Fec.
+
+
+```{r elimnacion Fec}
+
+dsFrontur$Fec <- NULL
+
+head(dsFrontur)
+
+```
 
 Se genera un fichero en formato csv con los datos del dataset.
 

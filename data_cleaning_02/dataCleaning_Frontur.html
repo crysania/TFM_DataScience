@@ -144,12 +144,21 @@ setwd(&quot;C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/&quot;)</code></pr
 <p>Se produce la limpieza de datos, es decir, la decisión sobre qué datos se van a emplear en el análisis, usando criterios relativos a la relevancia para los objetivos, la calidad de los mismos o restricciones técnicas por las técnicas de análisis.</p>
 <p>Esta selección a realizar se refiere tanto a los atributos o campos de los registros en los ficheros, como a los registros en sí.</p>
 <p>Esta tarea incluiría, si fuera necesario, la inserción de valores por defecto adecuados o el uso de modelado para estimar los valores ausentes (missing values).</p>
-<p>Los ficheros que se van a limpiar en este script son los relacionados con “Estadística de movimientos turísticos en frontera. Frontur”&quot;</p>
+<p>Los ficheros que se van a limpiar en este script son los relacionados con “Estadística de movimientos turísticos en frontera. Frontur”</p>
 <pre class="r"><code>frontur0117=read.table('../data_01/Frontur/datos_frontur0117.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
 frontur0217 &lt;- read.table('../data_01/Frontur/datos_frontur0217.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
 frontur0317 &lt;- read.table('../data_01/Frontur/datos_frontur0317.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+frontur0417 &lt;- read.table('../data_01/Frontur/datos_frontur0417.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+
+frontur0116 &lt;- read.table('../data_01/Frontur/datos_frontur0116.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+frontur0216 &lt;- read.table('../data_01/Frontur/datos_frontur0216.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+frontur0316 &lt;- read.table('../data_01/Frontur/datos_frontur0316.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
 frontur0416 &lt;- read.table('../data_01/Frontur/datos_frontur0416.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
@@ -169,22 +178,38 @@ frontur1116 &lt;- read.table('../data_01/Frontur/datos_frontur1116.txt', sep = '
 
 frontur1216 &lt;- read.table('../data_01/Frontur/datos_frontur1216.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
-#se crea una columna con el mes de cada fichero
 
-frontur0117$Mes&lt;-01
-frontur0217$Mes&lt;-02
-frontur0317$Mes&lt;-03
-frontur0416$Mes&lt;-04
-frontur0516$Mes&lt;-05
-frontur0616$Mes&lt;-06
-frontur0716$Mes&lt;-07
-frontur0816$Mes&lt;-08
-frontur0916$Mes&lt;-09
-frontur1016$Mes&lt;-10
-frontur1116$Mes&lt;-11
-frontur1216$Mes&lt;-12</code></pre>
+frontur1015 &lt;- read.table('../data_01/Frontur/datos_frontur1015.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+frontur1115 &lt;- read.table('../data_01/Frontur/datos_frontur1115.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+frontur1215 &lt;- read.table('../data_01/Frontur/datos_frontur1215.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+#se crea una columna con el mesaño de cada fichero
+
+frontur0117$Fec&lt;-&quot;0117&quot;
+frontur0217$Fec&lt;-&quot;0217&quot;
+frontur0317$Fec&lt;-&quot;0317&quot;
+frontur0417$Fec&lt;-&quot;0417&quot;
+
+frontur0116$Fec&lt;-&quot;0116&quot;
+frontur0216$Fec&lt;-&quot;0216&quot;
+frontur0316$Fec&lt;-&quot;0316&quot;
+frontur0416$Fec&lt;-&quot;0416&quot;
+frontur0516$Fec&lt;-&quot;0516&quot;
+frontur0616$Fec&lt;-&quot;0616&quot;
+frontur0716$Fec&lt;-&quot;0716&quot;
+frontur0816$Fec&lt;-&quot;0816&quot;
+frontur0916$Fec&lt;-&quot;0916&quot;
+frontur1016$Fec&lt;-&quot;1016&quot;
+frontur1116$Fec&lt;-&quot;1116&quot;
+frontur1216$Fec&lt;-&quot;1216&quot;
+
+frontur1015$Fec&lt;-&quot;1015&quot;
+frontur1115$Fec&lt;-&quot;1115&quot;
+frontur1215$Fec&lt;-&quot;1215&quot;</code></pre>
 <p>Se van a unificar todos los datos de los ficheros en un unico DataSet.</p>
-<pre class="r"><code>dsFrontur&lt;-rbind(frontur0117,frontur0217,frontur0317,frontur0416,frontur0516,frontur0616,frontur0716,frontur0816,frontur0916,frontur1016,frontur1116,frontur1216)
+<pre class="r"><code>dsFrontur&lt;-rbind(frontur0117,frontur0217,frontur0317,frontur0417,frontur0116,frontur0216,frontur0316,frontur0416,frontur0516,frontur0616,frontur0716,frontur0816,frontur0916,frontur1016,frontur1116,frontur1216,frontur1015,frontur1115,frontur1215)
 
 head(dsFrontur)</code></pre>
 <pre><code>##   A0           A0_1 A0_7 A1 Residencia CCAA A14 A15 A16 A13_1       Factor
@@ -194,13 +219,13 @@ head(dsFrontur)</code></pre>
 ## 4  2 20170101000001    3  2         13   05   0   1   1     1 238.05976594
 ## 5  1 20170100020431    2  2         13   05   8   1   6     4 96.916499144
 ## 6  2 20170100010177    2  2         13   13   8   4   6     4 90.629229705
-##   Mes
-## 1   1
-## 2   1
-## 3   1
-## 4   1
-## 5   1
-## 6   1</code></pre>
+##    Fec
+## 1 0117
+## 2 0117
+## 3 0117
+## 4 0117
+## 5 0117
+## 6 0117</code></pre>
 <p>Se modifican los nombres de las columnas.</p>
 <pre class="r"><code>colnames(dsFrontur)[colnames(dsFrontur)==&quot;A0&quot;] &lt;- &quot;Encuesta&quot;
 colnames(dsFrontur)[colnames(dsFrontur)==&quot;A0_1&quot;] &lt;- &quot;Id&quot;
@@ -223,33 +248,33 @@ head(dsFrontur)</code></pre>
 ## 4        2 20170101000001            3           2   13           05
 ## 5        1 20170100020431            2           2   13           05
 ## 6        2 20170100010177            2           2   13           13
-##   Alojamiento Motivo Paquete_Turistico Pernoctaciones     Viajeros Mes
-## 1           8      4                 6              4 90.629229705   1
-## 2           8      4                 6              4 90.629229705   1
-## 3           2      1                 6              4 103.61073268   1
-## 4           0      1                 1              1 238.05976594   1
-## 5           8      1                 6              4 96.916499144   1
-## 6           8      4                 6              4 90.629229705   1</code></pre>
-<p>Eliminamos las columnas que no nos interesan en este caso Encuesta e Id.</p>
+##   Alojamiento Motivo Paquete_Turistico Pernoctaciones     Viajeros  Fec
+## 1           8      4                 6              4 90.629229705 0117
+## 2           8      4                 6              4 90.629229705 0117
+## 3           2      1                 6              4 103.61073268 0117
+## 4           0      1                 1              1 238.05976594 0117
+## 5           8      1                 6              4 96.916499144 0117
+## 6           8      4                 6              4 90.629229705 0117</code></pre>
+<p>Eliminamos las columnas que no nos interesan en este caso Encuesta.</p>
 <pre class="r"><code>dsFrontur$Encuesta &lt;- NULL
-dsFrontur$Id &lt;- NULL
 
 head(dsFrontur)</code></pre>
-<pre><code>##   Tipo_Viajero Via_Entrada Pais Destino_CCAA Alojamiento Motivo
-## 1            2           2   13           13           8      4
-## 2            2           2   13           13           8      4
-## 3            2           2   13           13           2      1
-## 4            3           2   13           05           0      1
-## 5            2           2   13           05           8      1
-## 6            2           2   13           13           8      4
-##   Paquete_Turistico Pernoctaciones     Viajeros Mes
-## 1                 6              4 90.629229705   1
-## 2                 6              4 90.629229705   1
-## 3                 6              4 103.61073268   1
-## 4                 1              1 238.05976594   1
-## 5                 6              4 96.916499144   1
-## 6                 6              4 90.629229705   1</code></pre>
-<p>Se formatea los datos a los tipos adecuados: 1. Tipos numéricos (Tipo_Viajero, Paquete_Turistico y Viajeros) 2. Tipos Categóricos (Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Pernoctaciones y Mes)</p>
+<pre><code>##               Id Tipo_Viajero Via_Entrada Pais Destino_CCAA Alojamiento
+## 1 20170102010177            2           2   13           13           8
+## 2 20170101010177            2           2   13           13           8
+## 3 20170100028497            2           2   13           13           2
+## 4 20170101000001            3           2   13           05           0
+## 5 20170100020431            2           2   13           05           8
+## 6 20170100010177            2           2   13           13           8
+##   Motivo Paquete_Turistico Pernoctaciones     Viajeros  Fec
+## 1      4                 6              4 90.629229705 0117
+## 2      4                 6              4 90.629229705 0117
+## 3      1                 6              4 103.61073268 0117
+## 4      1                 1              1 238.05976594 0117
+## 5      1                 6              4 96.916499144 0117
+## 6      4                 6              4 90.629229705 0117</code></pre>
+<p>Se formatea los datos a los tipos adecuados: 1. Tipos numéricos (Id,Tipo_Viajero, Paquete_Turistico y Viajeros) 2. Tipos Categóricos (Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Pernoctaciones y Fec)</p>
+<p>La columna Fec se divide en dos: Mes y Anyo.</p>
 <pre class="r"><code>dsFrontur$Tipo_Viajero&lt;-as.numeric(dsFrontur$Tipo_Viajero)
 dsFrontur$Paquete_Turistico&lt;-as.numeric(dsFrontur$Paquete_Turistico)
 dsFrontur$Viajeros&lt;-as.numeric(dsFrontur$Viajeros)
@@ -260,23 +285,42 @@ dsFrontur$Destino_CCAA&lt;-as.factor(dsFrontur$Destino_CCAA)
 dsFrontur$Alojamiento&lt;-as.factor(dsFrontur$Alojamiento)
 dsFrontur$Motivo&lt;-as.factor(dsFrontur$Motivo)
 dsFrontur$Pernoctaciones&lt;-as.factor(dsFrontur$Pernoctaciones)
-dsFrontur$Mes&lt;-as.factor(dsFrontur$Mes)
+dsFrontur$Mes&lt;-as.factor(substr(dsFrontur$Fec,1,2))
+dsFrontur$Anyo&lt;-as.factor(substr(dsFrontur$Fec,3,4))
 
 head(dsFrontur)</code></pre>
-<pre><code>##   Tipo_Viajero Via_Entrada Pais Destino_CCAA Alojamiento Motivo
-## 1            2           2   13           13           8      4
-## 2            2           2   13           13           8      4
-## 3            2           2   13           13           2      1
-## 4            3           2   13           05           0      1
-## 5            2           2   13           05           8      1
-## 6            2           2   13           13           8      4
-##   Paquete_Turistico Pernoctaciones  Viajeros Mes
-## 1                 6              4  90.62923   1
-## 2                 6              4  90.62923   1
-## 3                 6              4 103.61073   1
-## 4                 1              1 238.05977   1
-## 5                 6              4  96.91650   1
-## 6                 6              4  90.62923   1</code></pre>
+<pre><code>##               Id Tipo_Viajero Via_Entrada Pais Destino_CCAA Alojamiento
+## 1 20170102010177            2           2   13           13           8
+## 2 20170101010177            2           2   13           13           8
+## 3 20170100028497            2           2   13           13           2
+## 4 20170101000001            3           2   13           05           0
+## 5 20170100020431            2           2   13           05           8
+## 6 20170100010177            2           2   13           13           8
+##   Motivo Paquete_Turistico Pernoctaciones  Viajeros  Fec Mes Anyo
+## 1      4                 6              4  90.62923 0117  01   17
+## 2      4                 6              4  90.62923 0117  01   17
+## 3      1                 6              4 103.61073 0117  01   17
+## 4      1                 1              1 238.05977 0117  01   17
+## 5      1                 6              4  96.91650 0117  01   17
+## 6      4                 6              4  90.62923 0117  01   17</code></pre>
+<p>Una vez que se genera las dos nuevas columnas con el mes y el año, se elimina la columna Fec.</p>
+<pre class="r"><code>dsFrontur$Fec &lt;- NULL
+
+head(dsFrontur)</code></pre>
+<pre><code>##               Id Tipo_Viajero Via_Entrada Pais Destino_CCAA Alojamiento
+## 1 20170102010177            2           2   13           13           8
+## 2 20170101010177            2           2   13           13           8
+## 3 20170100028497            2           2   13           13           2
+## 4 20170101000001            3           2   13           05           0
+## 5 20170100020431            2           2   13           05           8
+## 6 20170100010177            2           2   13           13           8
+##   Motivo Paquete_Turistico Pernoctaciones  Viajeros Mes Anyo
+## 1      4                 6              4  90.62923  01   17
+## 2      4                 6              4  90.62923  01   17
+## 3      1                 6              4 103.61073  01   17
+## 4      1                 1              1 238.05977  01   17
+## 5      1                 6              4  96.91650  01   17
+## 6      4                 6              4  90.62923  01   17</code></pre>
 <p>Se genera un fichero en formato csv con los datos del dataset.</p>
 <pre class="r"><code>write.csv(dsFrontur,file=&quot;Frontur.csv&quot;,row.names = FALSE)</code></pre>
 </div>
