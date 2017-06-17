@@ -53,6 +53,15 @@ egatur0217 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0217.txt', se
 
 egatur0317 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0317.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
+egatur0417 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0417.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+
+egatur0116 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0116.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0216 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0216.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
+egatur0316 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0316.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
 egatur0416 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0416.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
 egatur0516 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0516.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
@@ -71,21 +80,12 @@ egatur1116 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1116.txt', se
 
 egatur1216 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1216.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
+egatur1015 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1015.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
-#se crea una columna con el mes de cada fichero
+egatur1115 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1115.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
 
-egatur0117$Mes<-01
-egatur0217$Mes<-02
-egatur0317$Mes<-03
-egatur0416$Mes<-04
-egatur0516$Mes<-05
-egatur0616$Mes<-06
-egatur0716$Mes<-07
-egatur0816$Mes<-08
-egatur0916$Mes<-09
-egatur1016$Mes<-10
-egatur1116$Mes<-11
-egatur1216$Mes<-12
+egatur1215 <- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1215.txt', sep = ';', colClasses = "character", header=TRUE, fileEncoding = "latin1")
+
 
 ```
 
@@ -95,7 +95,7 @@ Se van a unificar todos los datos de los ficheros en un unico DataSet.
 
 ```{r crear DataSet}
 
-dsEgatur<-rbind(egatur0117,egatur0217,egatur0317,egatur0416,egatur0516,egatur0616,egatur0716,egatur0816,egatur0916,egatur1016,egatur1116,egatur1216)
+dsEgatur<-rbind(egatur0117,egatur0217,egatur0317,egatur0417,egatur0116,egatur0216,egatur0316,egatur0416,egatur0516,egatur0616,egatur0716,egatur0816,egatur0916,egatur1016,egatur1116,egatur1216,egatur1015,egatur1115,egatur1215)
 
 head(dsEgatur)
 
@@ -119,7 +119,7 @@ colnames(dsEgatur)[colnames(dsEgatur)=="motivo"] <- "Motivo"
 colnames(dsEgatur)[colnames(dsEgatur)=="A16"] <- "Paquete_Turistico"
 colnames(dsEgatur)[colnames(dsEgatur)=="gastototal"] <- "Gasto_Total"
 colnames(dsEgatur)[colnames(dsEgatur)=="factoregatur"] <- "Viajeros"
-
+colnames(dsEgatur)[colnames(dsEgatur)=="mm_aaaa"] <- "Fec"
 
 head(dsEgatur)
 
@@ -130,9 +130,7 @@ Eliminamos las columnas que no nos interesan en este caso mm_aaaa, Encuesta e Id
 
 ```{r eliminar columnas}
 
-dsEgatur$mm_aaaa <- NULL
 dsEgatur$Encuesta <- NULL
-dsEgatur$Id <- NULL
 
 head(dsEgatur)
 
@@ -141,11 +139,14 @@ head(dsEgatur)
 
 Se formatea los datos a los tipos adecuados:
   1. Tipos numéricos (Tipo_Viajero, Viajeros y Gasto_Total)
-  2. Tipos Categóricos (Via_Salida, Pais, Destino_CCAA, Pernoctaciones, Alojamiento, Motivo, Paquete_Turistico y Mes)
+  2. Tipos Categóricos (Via_Salida, Pais, Destino_CCAA, Pernoctaciones, Alojamiento, Motivo, Paquete_Turistico y Fec)
+
+La columna Fec se divide en dos: Mes y Anyo.
 
 
 ```{r data format}
 
+dsEgatur$Id<-as.character(dsEgatur$Id)
 dsEgatur$Tipo_Viajero<-as.numeric(dsEgatur$Tipo_Viajero)
 dsEgatur$Viajeros<-as.numeric(dsEgatur$Viajeros)
 dsEgatur$Gasto_Total<-as.numeric(dsEgatur$Gasto_Total)
@@ -157,9 +158,21 @@ dsEgatur$Pernoctaciones<-as.factor(dsEgatur$Pernoctaciones)
 dsEgatur$Alojamiento<-as.factor(dsEgatur$Alojamiento)
 dsEgatur$Motivo<-as.factor(dsEgatur$Motivo)
 dsEgatur$Paquete_Turistico<-as.factor(dsEgatur$Paquete_Turistico)
-dsEgatur$Mes<-as.factor(dsEgatur$Mes)
+dsEgatur$Mes<-as.factor(substr(dsEgatur$Fec,1,2))
+dsEgatur$Anyo<-as.factor(substr(dsEgatur$Fec,3,6))
 
 
+
+head(dsEgatur)
+
+```
+
+Una vez que se genera las dos nuevas columnas con el mes y el año, se elimina la columna Fec.
+
+
+```{r elimnacion Fec}
+
+dsEgatur$Fec <- NULL
 
 head(dsEgatur)
 

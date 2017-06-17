@@ -152,6 +152,15 @@ egatur0217 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0217.txt',
 
 egatur0317 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0317.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
+egatur0417 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0417.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+
+egatur0116 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0116.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+egatur0216 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0216.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
+egatur0316 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0316.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
+
 egatur0416 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0416.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
 egatur0516 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_0516.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
@@ -170,23 +179,13 @@ egatur1116 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1116.txt',
 
 egatur1216 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1216.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
+egatur1015 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1015.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
-#se crea una columna con el mes de cada fichero
+egatur1115 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1115.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)
 
-egatur0117$Mes&lt;-01
-egatur0217$Mes&lt;-02
-egatur0317$Mes&lt;-03
-egatur0416$Mes&lt;-04
-egatur0516$Mes&lt;-05
-egatur0616$Mes&lt;-06
-egatur0716$Mes&lt;-07
-egatur0816$Mes&lt;-08
-egatur0916$Mes&lt;-09
-egatur1016$Mes&lt;-10
-egatur1116$Mes&lt;-11
-egatur1216$Mes&lt;-12</code></pre>
+egatur1215 &lt;- read.table('../data_01/Egatur/elevado_eg_mod_web_tur_1215.txt', sep = ';', colClasses = &quot;character&quot;, header=TRUE, fileEncoding = &quot;latin1&quot;)</code></pre>
 <p>Se van a unificar todos los datos de los ficheros en un unico DataSet.</p>
-<pre class="r"><code>dsEgatur&lt;-rbind(egatur0117,egatur0217,egatur0317,egatur0416,egatur0516,egatur0616,egatur0716,egatur0816,egatur0916,egatur1016,egatur1116,egatur1216)
+<pre class="r"><code>dsEgatur&lt;-rbind(egatur0117,egatur0217,egatur0317,egatur0417,egatur0116,egatur0216,egatur0316,egatur0416,egatur0516,egatur0616,egatur0716,egatur0816,egatur0916,egatur1016,egatur1116,egatur1216,egatur1015,egatur1115,egatur1215)
 
 head(dsEgatur)</code></pre>
 <pre><code>##   mm_aaaa A0           A0_1 A0_7 A1 pais ccaa A13 aloja motivo A16
@@ -196,13 +195,13 @@ head(dsEgatur)</code></pre>
 ## 4  012017  2 0115EVA0001326    2  2   14   09  13     3      3   6
 ## 5  012017  2 0115EVA0001394    2  2   04   01   7     1      1   6
 ## 6  012017  2 0115EVA0001395    2  2   04   01  12     1      1   1
-##     gastototal factoregatur Mes
-## 1 1464.6087706 188.80330377   1
-## 2 1690.4543425 96.945894767   1
-## 3 1890.8171938 96.945894767   1
-## 4 1671.5380879  87.97956387   1
-## 5 1009.9270598 93.575647484   1
-## 6 1602.0324588 75.969917725   1</code></pre>
+##     gastototal factoregatur
+## 1 1464.6087706 188.80330377
+## 2 1690.4543425 96.945894767
+## 3 1890.8171938 96.945894767
+## 4 1671.5380879  87.97956387
+## 5 1009.9270598 93.575647484
+## 6 1602.0324588 75.969917725</code></pre>
 <p>Se modifican los nombres de las columnas.</p>
 <pre class="r"><code>colnames(dsEgatur)[colnames(dsEgatur)==&quot;A0&quot;] &lt;- &quot;Encuesta&quot;
 colnames(dsEgatur)[colnames(dsEgatur)==&quot;A0_1&quot;] &lt;- &quot;Id&quot;
@@ -216,52 +215,59 @@ colnames(dsEgatur)[colnames(dsEgatur)==&quot;motivo&quot;] &lt;- &quot;Motivo&qu
 colnames(dsEgatur)[colnames(dsEgatur)==&quot;A16&quot;] &lt;- &quot;Paquete_Turistico&quot;
 colnames(dsEgatur)[colnames(dsEgatur)==&quot;gastototal&quot;] &lt;- &quot;Gasto_Total&quot;
 colnames(dsEgatur)[colnames(dsEgatur)==&quot;factoregatur&quot;] &lt;- &quot;Viajeros&quot;
-
+colnames(dsEgatur)[colnames(dsEgatur)==&quot;mm_aaaa&quot;] &lt;- &quot;Fec&quot;
 
 head(dsEgatur)</code></pre>
-<pre><code>##   mm_aaaa Encuesta             Id Tipo_Viajero Via_Salida Pais
-## 1  012017        2 0115EVA0000106            2          2   14
-## 2  012017        2 0115EVA0000142            2          2   14
-## 3  012017        2 0115EVA0000872            2          2   14
-## 4  012017        2 0115EVA0001326            2          2   14
-## 5  012017        2 0115EVA0001394            2          2   04
-## 6  012017        2 0115EVA0001395            2          2   04
-##   Destino_CCAA Pernoctaciones Alojamiento Motivo Paquete_Turistico
-## 1           13              4           1      1                 6
-## 2           13             18           3      3                 6
-## 3           13             19           3      3                 6
-## 4           09             13           3      3                 6
-## 5           01              7           1      1                 6
-## 6           01             12           1      1                 1
-##    Gasto_Total     Viajeros Mes
-## 1 1464.6087706 188.80330377   1
-## 2 1690.4543425 96.945894767   1
-## 3 1890.8171938 96.945894767   1
-## 4 1671.5380879  87.97956387   1
-## 5 1009.9270598 93.575647484   1
-## 6 1602.0324588 75.969917725   1</code></pre>
+<pre><code>##      Fec Encuesta             Id Tipo_Viajero Via_Salida Pais Destino_CCAA
+## 1 012017        2 0115EVA0000106            2          2   14           13
+## 2 012017        2 0115EVA0000142            2          2   14           13
+## 3 012017        2 0115EVA0000872            2          2   14           13
+## 4 012017        2 0115EVA0001326            2          2   14           09
+## 5 012017        2 0115EVA0001394            2          2   04           01
+## 6 012017        2 0115EVA0001395            2          2   04           01
+##   Pernoctaciones Alojamiento Motivo Paquete_Turistico  Gasto_Total
+## 1              4           1      1                 6 1464.6087706
+## 2             18           3      3                 6 1690.4543425
+## 3             19           3      3                 6 1890.8171938
+## 4             13           3      3                 6 1671.5380879
+## 5              7           1      1                 6 1009.9270598
+## 6             12           1      1                 1 1602.0324588
+##       Viajeros
+## 1 188.80330377
+## 2 96.945894767
+## 3 96.945894767
+## 4  87.97956387
+## 5 93.575647484
+## 6 75.969917725</code></pre>
 <p>Eliminamos las columnas que no nos interesan en este caso mm_aaaa, Encuesta e Id.</p>
-<pre class="r"><code>dsEgatur$mm_aaaa &lt;- NULL
-dsEgatur$Encuesta &lt;- NULL
-dsEgatur$Id &lt;- NULL
+<pre class="r"><code>dsEgatur$Encuesta &lt;- NULL
 
 head(dsEgatur)</code></pre>
-<pre><code>##   Tipo_Viajero Via_Salida Pais Destino_CCAA Pernoctaciones Alojamiento
-## 1            2          2   14           13              4           1
-## 2            2          2   14           13             18           3
-## 3            2          2   14           13             19           3
-## 4            2          2   14           09             13           3
-## 5            2          2   04           01              7           1
-## 6            2          2   04           01             12           1
-##   Motivo Paquete_Turistico  Gasto_Total     Viajeros Mes
-## 1      1                 6 1464.6087706 188.80330377   1
-## 2      3                 6 1690.4543425 96.945894767   1
-## 3      3                 6 1890.8171938 96.945894767   1
-## 4      3                 6 1671.5380879  87.97956387   1
-## 5      1                 6 1009.9270598 93.575647484   1
-## 6      1                 1 1602.0324588 75.969917725   1</code></pre>
-<p>Se formatea los datos a los tipos adecuados: 1. Tipos numéricos (Tipo_Viajero, Viajeros y Gasto_Total) 2. Tipos Categóricos (Via_Salida, Pais, Destino_CCAA, Pernoctaciones, Alojamiento, Motivo, Paquete_Turistico y Mes)</p>
-<pre class="r"><code>dsEgatur$Tipo_Viajero&lt;-as.numeric(dsEgatur$Tipo_Viajero)
+<pre><code>##      Fec             Id Tipo_Viajero Via_Salida Pais Destino_CCAA
+## 1 012017 0115EVA0000106            2          2   14           13
+## 2 012017 0115EVA0000142            2          2   14           13
+## 3 012017 0115EVA0000872            2          2   14           13
+## 4 012017 0115EVA0001326            2          2   14           09
+## 5 012017 0115EVA0001394            2          2   04           01
+## 6 012017 0115EVA0001395            2          2   04           01
+##   Pernoctaciones Alojamiento Motivo Paquete_Turistico  Gasto_Total
+## 1              4           1      1                 6 1464.6087706
+## 2             18           3      3                 6 1690.4543425
+## 3             19           3      3                 6 1890.8171938
+## 4             13           3      3                 6 1671.5380879
+## 5              7           1      1                 6 1009.9270598
+## 6             12           1      1                 1 1602.0324588
+##       Viajeros
+## 1 188.80330377
+## 2 96.945894767
+## 3 96.945894767
+## 4  87.97956387
+## 5 93.575647484
+## 6 75.969917725</code></pre>
+<p>Se formatea los datos a los tipos adecuados: 1. Tipos numéricos (Tipo_Viajero, Viajeros y Gasto_Total) 2. Tipos Categóricos (Via_Salida, Pais, Destino_CCAA, Pernoctaciones, Alojamiento, Motivo, Paquete_Turistico y Fec)</p>
+<p>La columna Fec se divide en dos: Mes y Anyo.</p>
+<pre class="r"><code>dsEgatur$Id&lt;-as.character(dsEgatur$Id)
+dsEgatur$Tipo_Viajero&lt;-as.numeric(dsEgatur$Tipo_Viajero)
 dsEgatur$Viajeros&lt;-as.numeric(dsEgatur$Viajeros)
 dsEgatur$Gasto_Total&lt;-as.numeric(dsEgatur$Gasto_Total)
 
@@ -272,25 +278,51 @@ dsEgatur$Pernoctaciones&lt;-as.factor(dsEgatur$Pernoctaciones)
 dsEgatur$Alojamiento&lt;-as.factor(dsEgatur$Alojamiento)
 dsEgatur$Motivo&lt;-as.factor(dsEgatur$Motivo)
 dsEgatur$Paquete_Turistico&lt;-as.factor(dsEgatur$Paquete_Turistico)
-dsEgatur$Mes&lt;-as.factor(dsEgatur$Mes)
+dsEgatur$Mes&lt;-as.factor(substr(dsEgatur$Fec,1,2))
+dsEgatur$Anyo&lt;-as.factor(substr(dsEgatur$Fec,3,6))
 
 
 
 head(dsEgatur)</code></pre>
-<pre><code>##   Tipo_Viajero Via_Salida Pais Destino_CCAA Pernoctaciones Alojamiento
-## 1            2          2   14           13              4           1
-## 2            2          2   14           13             18           3
-## 3            2          2   14           13             19           3
-## 4            2          2   14           09             13           3
-## 5            2          2   04           01              7           1
-## 6            2          2   04           01             12           1
-##   Motivo Paquete_Turistico Gasto_Total  Viajeros Mes
-## 1      1                 6    1464.609 188.80330   1
-## 2      3                 6    1690.454  96.94589   1
-## 3      3                 6    1890.817  96.94589   1
-## 4      3                 6    1671.538  87.97956   1
-## 5      1                 6    1009.927  93.57565   1
-## 6      1                 1    1602.032  75.96992   1</code></pre>
+<pre><code>##      Fec             Id Tipo_Viajero Via_Salida Pais Destino_CCAA
+## 1 012017 0115EVA0000106            2          2   14           13
+## 2 012017 0115EVA0000142            2          2   14           13
+## 3 012017 0115EVA0000872            2          2   14           13
+## 4 012017 0115EVA0001326            2          2   14           09
+## 5 012017 0115EVA0001394            2          2   04           01
+## 6 012017 0115EVA0001395            2          2   04           01
+##   Pernoctaciones Alojamiento Motivo Paquete_Turistico Gasto_Total
+## 1              4           1      1                 6    1464.609
+## 2             18           3      3                 6    1690.454
+## 3             19           3      3                 6    1890.817
+## 4             13           3      3                 6    1671.538
+## 5              7           1      1                 6    1009.927
+## 6             12           1      1                 1    1602.032
+##    Viajeros Mes Anyo
+## 1 188.80330  01 2017
+## 2  96.94589  01 2017
+## 3  96.94589  01 2017
+## 4  87.97956  01 2017
+## 5  93.57565  01 2017
+## 6  75.96992  01 2017</code></pre>
+<p>Una vez que se genera las dos nuevas columnas con el mes y el año, se elimina la columna Fec.</p>
+<pre class="r"><code>dsEgatur$Fec &lt;- NULL
+
+head(dsEgatur)</code></pre>
+<pre><code>##               Id Tipo_Viajero Via_Salida Pais Destino_CCAA Pernoctaciones
+## 1 0115EVA0000106            2          2   14           13              4
+## 2 0115EVA0000142            2          2   14           13             18
+## 3 0115EVA0000872            2          2   14           13             19
+## 4 0115EVA0001326            2          2   14           09             13
+## 5 0115EVA0001394            2          2   04           01              7
+## 6 0115EVA0001395            2          2   04           01             12
+##   Alojamiento Motivo Paquete_Turistico Gasto_Total  Viajeros Mes Anyo
+## 1           1      1                 6    1464.609 188.80330  01 2017
+## 2           3      3                 6    1690.454  96.94589  01 2017
+## 3           3      3                 6    1890.817  96.94589  01 2017
+## 4           3      3                 6    1671.538  87.97956  01 2017
+## 5           1      1                 6    1009.927  93.57565  01 2017
+## 6           1      1                 1    1602.032  75.96992  01 2017</code></pre>
 <p>Se genera un fichero en formato csv con los datos del dataset.</p>
 <pre class="r"><code>write.csv(dsEgatur,file=&quot;Egatur.csv&quot;,row.names = FALSE )</code></pre>
 </div>
