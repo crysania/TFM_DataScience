@@ -19,10 +19,11 @@ output:
 
 # Se establece el directorio de trabajo y las librerías necesarias
 
-library(plyr)
-library(dplyr)
-library(ggplot2)
-library(reshape2)
+library(plyr)<br>
+library(dplyr)<br>
+library(ggplot2)<br>
+library(reshape2)<br>
+library(data.table)<br>
 
 ```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -35,6 +36,7 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 library(reshape2)
+library(data.table)
 
 
 ```
@@ -42,51 +44,51 @@ library(reshape2)
 
 # Exploración de los datos
 
-El segundo paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE para poder plantear una solución a partir de los mismos, mediante una transformación de los datos para adecuarlo al problema de modelado que se quiere resolver.
+En este script del TFM, se va a hacer una exploración y transformación de los datos obtenidos del INE para poder plantear una solución, a partir de los mismos, para adecuarlos al problema de modelado que se quiere resolver.
 
-En esta fase se procede, a partir del fichero csv de la etapa anterior "data_Cleaning", a la generación de nuevos registros o valores transformados de atributos existentes si fuera necesario, en función de los requerimientos para preparar la entrada a las herramientas de modelado.
+En esta fase se procede, a partir del fichero csv generado en la etapa anterior "data_Cleaning", a la generación de nuevos registros o valores transformados de atributos existentes, si fuera necesario, en función de los requerimientos para preparar la entrada a las herramientas de modelado.
 
 Cabe recordar que los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
 
-Se procede a dar formato a datos, estas transformaciones se refieren a modificaciones sintácticas que se hacen sobre los datos, sin alterar su significado pero que pueden ser requeridas por la herramienta de modelado a utilizar.
+Se procede a dar formato a los datos, estas transformaciones se refieren a modificaciones sintácticas que se hacen sobre ellos, sin alterar su significado pero que pueden ser requeridas por la herramienta de modelado a utilizar.
 
-Por ejemplo, puede que haya requisitos en el orden de los atributos, o que la herramienta de modelado requiera que los registros estén ordenados según el atributo resultado. 
+Puede que haya requisitos en el orden de los atributos o que los registros estén ordenados según el atributo resultado, mediante la evaluación de la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
 
-Esta etapa se centra en evaluar la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
+El período de tiempo que se va a utilizar en el TFM, será desde Octubre del 2015 hasta Abril del 2017 (19 meses).
 
-El período de tiempo que se va a utilizar en el TFM, será desde Abril del 2016 hasta Marzo del 2017 (12 meses).
+En el fichero Frontur.csv, cada registro representa a un viajero que finaliza su viaje por España en el mes de referencia. 
 
-En los ficheros de microdatos cada registro representa a un viajero que finaliza su viaje por España en el mes de referencia. 
+La variable que identifica de manera única cada registro es Id. Sumando el factor de elevación de cada registro ('Factor') se obtiene la estimación del número de viajeros, que podrá desglosarse en función del resto de variables de clasificación del fichero: turistas-excursionistas, destino principal, país de residencia, vía de acceso y tipo de alojamiento.
 
-La variable que identifica de manera única cada registro es A0_1. Sumando el factor de elevación de cada registro ('Factor') se obtiene la estimación del número de viajeros, que podrá desglosarse en función del resto de variables de clasificación del fichero: turistas-excursionistas, destino principal, país de residencia, vía de acceso y tipo de alojamiento.
+El fichero Paises.csv se relacionan los códigos de cada país, con el nombre del País de resisdencia habitual del turista.
+
+El fichero CCAA.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principial del viaje.
 
 
+```{r  Bloque de carga de datos Frontur.csv, Paises.csv y CCAA.csv}
 
-```{r  Bloque de carga de datos Frontur.csv}
-
-df_Frontur <- read.table("../data_cleaning_02/Frontur.csv", header = T, sep = ",")
+df_Frontur <- read.table("../data_cleaning_02/Frontur.csv", header = T, sep = "," , fileEncoding = "latin1")
 head(df_Frontur)
 
-df_Paises <- read.table("../data_01/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
+df_Paises <- read.table("../data_cleaning_02/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
 df_Paises
 
-df_CCAA <- read.table("../data_01/CCAA.csv", header = T, sep = ";",  fileEncoding="utf-8")
+df_CCAA <- read.table("../data_cleaning_02/CCAA.csv", header = T, sep = ";",  fileEncoding="utf-8")
 df_CCAA
 
 ```
 # Formateo de los datos
 
 Se formatea los datos a los tipos adecuados:
-  1. Tipos numéricos (Tipo_Viajero, Paquete_Turistico y Viajeros)
-  2. Tipos Categóricos (Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Pernoctaciones y Mes)
+  1. Tipos numéricos (Viajeros)
+  2. Tipos Categóricos (Tipo_Viajero, Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Paquete_Turistico , Pernoctaciones y Mes)
 
 
 ```{r data format}
 
-df_Frontur$Tipo_Viajero<-as.numeric(df_Frontur$Tipo_Viajero)
-df_Frontur$Paquete_Turistico<-as.numeric(df_Frontur$Paquete_Turistico)
 df_Frontur$Viajeros<-as.numeric(df_Frontur$Viajeros)
 
+df_Frontur$Tipo_Viajero<-as.factor(df_Frontur$Tipo_Viajero)
 df_Frontur$Via_Entrada<-as.factor(df_Frontur$Via_Entrada)
 df_Frontur$Pais<-as.factor(df_Frontur$Pais)
 df_Frontur$Destino_CCAA<-as.factor(df_Frontur$Destino_CCAA)
@@ -94,10 +96,16 @@ df_Frontur$Alojamiento<-as.factor(df_Frontur$Alojamiento)
 df_Frontur$Motivo<-as.factor(df_Frontur$Motivo)
 df_Frontur$Pernoctaciones<-as.factor(df_Frontur$Pernoctaciones)
 df_Frontur$Mes<-as.factor(df_Frontur$Mes)
+df_Frontur$Anyo<-as.factor(df_Frontur$Anyo)
+df_Frontur$Paquete_Turistico<-as.factor(df_Frontur$Paquete_Turistico)
+
 
 head(df_Frontur)
 
 df_Paises$Pais<-as.factor(df_Paises$Pais)
+
+df_CCAA$Codigo<-as.factor(df_CCAA$Codigo)
+colnames(df_CCAA)[colnames(df_CCAA)=="Codigo"] <- "Destino_CCAA"
 
 ```
 
@@ -123,18 +131,18 @@ Se detecta que los levels de las columnas (Pais, Destino y Motivo), no coinciden
 
 
 
-```{r Bloque estudio estadistico del dataset}
+```{r Bloque revision de los valores de los paises de residencia}
 
-new_df <- df_Frontur$Pais
-head(new_df)    
+head(df_Frontur$Pais)    
+
 ```
 Se detecta que no tiene el valor 3 que corresponde con España, por lo tanto es correcto que solo haya 15 valores.
 
 
-```{r }
+```{r Bloque revision de los valores de los destinos de CCAA}
 
-new_df <- df_Frontur$Destino_CCAA
-head(new_df)      
+head(df_Frontur$Destino_CCAA)
+
 ```
 
 No aparece Melilla (código = 19) como Destino principal del viaje, en cambio, como dato curioso Ceuta sí que aparece.
@@ -142,8 +150,7 @@ No aparece Melilla (código = 19) como Destino principal del viaje, en cambio, c
 
 ```{r }
 
-new_df <- df_Frontur$Motivo
-head(new_df) 
+head(df_Frontur$Motivo) 
 
 ```
 
@@ -151,7 +158,7 @@ En el caso de los motivos del viaje, se detecta que el valor 0 que significa "no
 
 
 
-# Valores perdidos & imposibles 
+# Valores perdidos (missing values) 
 
 
 El tratamiento de los datos es fundamental para la correcta interpretación de un análisis, los valores perdidos son aquellos que simplemente se ha perdido algún dato y no sabemos qué valor toma, se representa por el código: NA (Not available).
@@ -176,7 +183,7 @@ summary(df_Frontur)
 ```
 
 
-Total de turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017, son 115.913.282 y de media 179.6601
+Total de turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017, son 169.385.169 y de media 170.3478
 
 ```{r Bloque total turistas}
 
@@ -187,7 +194,7 @@ summarize(df_Frontur, total = sum(df_Frontur$Viajeros, na.rm = T), media = mean(
 
 Llegada de turistas internacionales por país de residencia, porcentaje respecto al total.
 
-```{r Bloque turistas mensuales que vienen a España}
+```{r Bloque turistas mensuales que vienen a España por Pais de Residencia}
 
 res <- ddply(df_Frontur, .(Pais), summarize, Total = sum(Viajeros))
 
@@ -200,9 +207,9 @@ df_merge
 
 ``` 
 
-Se va a representar de forma gráfica con un diagrama de barras, la llegada de turistas internacionales por país de residencia en porcentajes al total.
+Se representa de forma gráfica con un diagrama de barras, la llegada de turistas internacionales por país de residencia en porcentajes al total.
 
-Francia es el principal país de residencia con  32.209.639 turistas durante el periodo de estudio, lo que representa el 27 % del total.
+Francia es el principal país de residencia con 48.070.653 turistas durante el periodo de estudio, lo que representa el 28 % del total.
 
 Reino Unido y Alemania son los siguientes países de residencia con más turistas que visitan España.
 
@@ -215,13 +222,12 @@ df_merge
 ``` 
 
 
-```{r Bloque para representar las graficas}
+```{r Bloque para representar las graficas Paises}
 
 ggplot(data=df_merge, aes(y=pct, x=Nombre)) +
   geom_bar(stat="identity", fill="steelblue",  width=0.9) +
    labs(x = "Paises de residencia", y = "Porcentaje de turistas")+
   coord_flip() +
-  geom_text(aes(label=pct), vjust=0.7, color="white", size=2)+
   theme_minimal()
 
    
@@ -230,4 +236,81 @@ ggplot(data=df_merge, aes(y=pct, x=Nombre)) +
 ``` 
 
 
+
+
+Se representa de forma gráfica con un diagrama de barras,las Comunidades Autónomas de destino principal, porcentaje respecto al total.
+
+Cataluña es el principal destino principal de los turistas con 40294779.77 turistas durante el periodo de estudio, lo que representa el 24 % del total.
+
+Canarias (13%) y Andalucía (11%) son las siguientes Comunidades Autónomas con más turistas que visitan España.
+
+```{r Bloque turistas mensuales que vienen a España}
+
+res3 <- ddply(df_Frontur, .(Destino_CCAA), summarize, Total = sum(Viajeros))
+
+res4 <- ddply(res3, .(Destino_CCAA, Total), transform, pct= 100 * Total / sum(df_Frontur$Viajeros))
+res4
+
+
+df_mergeCCAA  <- inner_join(res4,df_CCAA)
+
+df_mergeCCAA <- df_mergeCCAA[order(df_mergeCCAA$Total,decreasing=T),]
+
+df_mergeCCAA
+
+``` 
+
+
+
+
+```{r Bloque para representar las graficas CCAA}
+
+ggplot(data=df_mergeCCAA, aes(y=pct, x=CCAA)) +
+  geom_bar(stat="identity", fill="steelblue",  width=0.9) +
+   labs(x = "Comunidades Autónomas", y = "Porcentaje de turistas")+
+  coord_flip() +
+  theme_minimal()
+
+ 
+```   
+
+Se utiliza un ggplot para representar la relación entre Viajeros, Destino_CCAA y año del estudio.
+
+En el 2015 se detecta que Cataluña es la CCAA más visitada, para el 2016 es la Comunidad de Madrid y en el 2017 es Castilla y León.
+
+```{r Bloque para representar ggplot}
+
+
+  ggplot(df_Frontur, aes(x = Destino_CCAA, y = Viajeros, col=df_Frontur$Anyo)) +
+    geom_point() + geom_smooth() 
+
+
+```
+
+
+Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017.
+
+
+```{r Bloque para representar la llegada de turistas internacionales por meses, variación Octubre 2015 a Abril 2017}
+
+Ft_dt <- data.table(df_Frontur)
+
+Total <- sum(df_Frontur$Viajeros)
+
+Ft_dt2 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes")]
+  
+Ft_dt2
+
+```
+
+
+Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017 y Destino_CCAA.
+
+```{r Bloque el número de turistas internacionales por meses y Destino_CCAA }
+
+Ft_dt3 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes", "Destino_CCAA")]
+
+Ft_dt3
+
+```
 
