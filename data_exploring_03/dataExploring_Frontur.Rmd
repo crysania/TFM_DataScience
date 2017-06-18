@@ -295,22 +295,37 @@ Se obtiene el número de turistas internacionales por meses, variación temporal
 
 Ft_dt <- data.table(df_Frontur)
 
-Total <- sum(df_Frontur$Viajeros)
-
 Ft_dt2 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes")]
-  
-Ft_dt2
+
+Ft_dt2 <- arrange(Ft_dt2,desc(Viajeros))
+
+head(Ft_dt2,20)
+
 
 ```
 
 
-Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017 y Destino_CCAA.
+Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017, Destino_CCAA y País.
 
-```{r Bloque el número de turistas internacionales por meses y Destino_CCAA }
+De los datos se obtiene que el mes de Agosto de 2016 hubo la mayor cantidad de viajeros franceses que utilizaron España como país de Tránsito, pero también son los franceses en este mismo mes y año que eligieron Cataluña como destino turístico Español.
 
-Ft_dt3 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes", "Destino_CCAA")]
 
-Ft_dt3
+```{r Bloque el número de turistas internacionales por meses, Pais y Destino_CCAA }
+
+Ft_dt3 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes", "Destino_CCAA", "Pais")]
+
+Ft_dt3 <- arrange(Ft_dt3,desc(Viajeros))
+
+head(Ft_dt3,20)
+
 
 ```
 
+
+
+Por el contrario en Agosto del 2016, fue el periodo menos visitado eligiendo Cantabria como destino.
+
+```{r menos visitas}
+tail(Ft_dt3,20)
+
+```
