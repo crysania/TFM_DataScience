@@ -1,0 +1,315 @@
+---
+title: "Predicción de los datos en Frontur.csv"
+author: "Sandra de la Fuente"
+date: "30 de mayo de 2017"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 7
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 1
+  pdf_document:
+    toc: yes
+  word_document: default
+---
+<br></br>
+
+
+# Se establece el directorio de trabajo y las librerías necesarias
+
+library(plyr)<br>
+library(dplyr)<br>
+library(ggplot2)<br>
+library(reshape2)<br>
+library(data.table)<br>
+
+```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
+
+#Limpiamos el workspace
+rm(list=ls())
+
+setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
+
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(data.table)
+
+
+```
+
+
+# Predicción de los datos
+
+Construimos un modelo RFM para el año 2015, con las variables Recencia, Frecuencia y Monetización, que
+definiremos para cada cliente de la siguiente forma:
+
+  - Recencia: Dias transcurridos entre la última compra y el final del periodo analizado.
+  - Frecuencia: Número de operaciones realizadas en dicho periodo.
+  - Monetización: Media de los importes de las ventas realizadas en este periodo.
+  
+
+```{r echo=FALSE, results="hide",warning=FALSE,message=FALSE}
+# Establecemos una semilla
+set.seed(1234)
+
+```
+
+
+
+
+
+
+
+```{r  Bloque de carga de datos Frontur.csv, Paises.csv y CCAA.csv}
+
+df_Frontur <- read.table("../data_cleaning_02/Frontur.csv", header = T, sep = "," , fileEncoding = "latin1")
+head(df_Frontur)
+
+df_Paises <- read.table("../data_cleaning_02/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
+df_Paises
+
+df_CCAA <- read.table("../data_cleaning_02/CCAA.csv", header = T, sep = ";",  fileEncoding="utf-8")
+df_CCAA
+
+```
+# Formateo de los datos
+
+Se formatea los datos a los tipos adecuados:
+  1. Tipos numéricos (Viajeros)
+  2. Tipos Categóricos (Tipo_Viajero, Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Paquete_Turistico , Pernoctaciones y Mes)
+
+
+```{r data format}
+
+df_Frontur$Viajeros<-as.numeric(df_Frontur$Viajeros)
+
+df_Frontur$Tipo_Viajero<-as.factor(df_Frontur$Tipo_Viajero)
+df_Frontur$Via_Entrada<-as.factor(df_Frontur$Via_Entrada)
+df_Frontur$Pais<-as.factor(df_Frontur$Pais)
+df_Frontur$Destino_CCAA<-as.factor(df_Frontur$Destino_CCAA)
+df_Frontur$Alojamiento<-as.factor(df_Frontur$Alojamiento)
+df_Frontur$Motivo<-as.factor(df_Frontur$Motivo)
+df_Frontur$Pernoctaciones<-as.factor(df_Frontur$Pernoctaciones)
+df_Frontur$Mes<-as.factor(df_Frontur$Mes)
+df_Frontur$Anyo<-as.factor(df_Frontur$Anyo)
+df_Frontur$Paquete_Turistico<-as.factor(df_Frontur$Paquete_Turistico)
+
+
+head(df_Frontur)
+
+df_Paises$Pais<-as.factor(df_Paises$Pais)
+
+df_CCAA$Codigo<-as.factor(df_CCAA$Codigo)
+colnames(df_CCAA)[colnames(df_CCAA)=="Codigo"] <- "Destino_CCAA"
+
+```
+
+
+# Revisión de los datos del fichero csv
+
+En este bloque se realiza una revisión de los datos para detectar. 
+
+```{r Bloque de revisión basica del dataset}
+
+head(df_Frontur)
+tail(df_Frontur)
+nrow(df_Frontur)
+ncol(df_Frontur)
+str(df_Frontur)
+
+```
+
+
+Se procede a comparar los datos obtenidos del dataset, con la documentacion del INE (fichero /data_01/Frontur/Diseño_Frontur_OpenData.xlsx en ), para detectar posibles datos nulos, outliers o datos erróneos.
+
+Se detecta que los levels de las columnas (Pais, Destino y Motivo), no coinciden con los de la documentación, por lo que se procede a la revisión de los mismos.
+
+
+
+```{r Bloque revision de los valores de los paises de residencia}
+
+head(df_Frontur$Pais)    
+
+```
+Se detecta que no tiene el valor 3 que corresponde con España, por lo tanto es correcto que solo haya 15 valores.
+
+
+```{r Bloque revision de los valores de los destinos de CCAA}
+
+head(df_Frontur$Destino_CCAA)
+
+```
+
+No aparece Melilla (código = 19) como Destino principal del viaje, en cambio, como dato curioso Ceuta sí que aparece.
+
+
+```{r }
+
+head(df_Frontur$Motivo) 
+
+```
+
+En el caso de los motivos del viaje, se detecta que el valor 0 que significa "no procede" no aparece en ningún registro del dataset.
+
+
+
+# Valores perdidos (missing values) 
+
+
+El tratamiento de los datos es fundamental para la correcta interpretación de un análisis, los valores perdidos son aquellos que simplemente se ha perdido algún dato y no sabemos qué valor toma, se representa por el código: NA (Not available).
+
+Hay muchas funciones para identificar estos valores, la más usada es is.na(), en este dataset no existen valores NaN ni NA.
+
+
+```{r  is.na() }
+
+sapply(df_Frontur,function(x) sum(is.na(x)))
+
+
+```
+
+
+# Análisis descriptivo de los datos
+
+```{r Bloque estadistica del dataset}
+
+summary(df_Frontur)
+
+```
+
+
+Total de turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017, son 169.385.169 y de media 170.3478
+
+```{r Bloque total turistas}
+
+summarize(df_Frontur, total = sum(df_Frontur$Viajeros, na.rm = T), media = mean(df_Frontur$Viajeros, na.rm = T))
+
+
+```
+
+Llegada de turistas internacionales por país de residencia, porcentaje respecto al total.
+
+```{r Bloque turistas mensuales que vienen a España por Pais de Residencia}
+
+res <- ddply(df_Frontur, .(Pais), summarize, Total = sum(Viajeros))
+
+res2 <- ddply(res, .(Pais, Total), transform, pct= 100 * Total / sum(df_Frontur$Viajeros))
+res2
+
+df_merge  <- inner_join(res2,df_Paises)
+df_merge
+
+
+``` 
+
+Se representa de forma gráfica con un diagrama de barras, la llegada de turistas internacionales por país de residencia en porcentajes al total.
+
+Francia es el principal país de residencia con 48.070.653 turistas durante el periodo de estudio, lo que representa el 28 % del total.
+
+Reino Unido y Alemania son los siguientes países de residencia con más turistas que visitan España.
+
+```{r Bloque para representar datos}
+
+df_merge<-df_merge[order(df_merge$Total,decreasing=T),]
+
+df_merge
+
+``` 
+
+
+```{r Bloque para representar las graficas Paises}
+
+ggplot(data=df_merge, aes(y=pct, x=Nombre)) +
+  geom_bar(stat="identity", fill="steelblue",  width=0.9) +
+   labs(x = "Paises de residencia", y = "Porcentaje de turistas")+
+  coord_flip() +
+  theme_minimal()
+
+   
+
+
+``` 
+
+
+
+
+Se representa de forma gráfica con un diagrama de barras,las Comunidades Autónomas de destino principal, porcentaje respecto al total.
+
+Cataluña es el principal destino principal de los turistas con 40294779.77 turistas durante el periodo de estudio, lo que representa el 24 % del total.
+
+Canarias (13%) y Andalucía (11%) son las siguientes Comunidades Autónomas con más turistas que visitan España.
+
+```{r Bloque turistas mensuales que vienen a España}
+
+res3 <- ddply(df_Frontur, .(Destino_CCAA), summarize, Total = sum(Viajeros))
+
+res4 <- ddply(res3, .(Destino_CCAA, Total), transform, pct= 100 * Total / sum(df_Frontur$Viajeros))
+res4
+
+
+df_mergeCCAA  <- inner_join(res4,df_CCAA)
+
+df_mergeCCAA <- df_mergeCCAA[order(df_mergeCCAA$Total,decreasing=T),]
+
+df_mergeCCAA
+
+``` 
+
+
+
+
+```{r Bloque para representar las graficas CCAA}
+
+ggplot(data=df_mergeCCAA, aes(y=pct, x=CCAA)) +
+  geom_bar(stat="identity", fill="steelblue",  width=0.9) +
+   labs(x = "Comunidades Autónomas", y = "Porcentaje de turistas")+
+  coord_flip() +
+  theme_minimal()
+
+ 
+```   
+
+Se utiliza un ggplot para representar la relación entre Viajeros, Destino_CCAA y año del estudio.
+
+En el 2015 se detecta que Cataluña es la CCAA más visitada, para el 2016 es la Comunidad de Madrid y en el 2017 es Castilla y León.
+
+```{r Bloque para representar ggplot}
+
+
+  ggplot(df_Frontur, aes(x = Destino_CCAA, y = Viajeros, col=df_Frontur$Anyo)) +
+    geom_point() + geom_smooth() 
+
+
+```
+
+
+Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017.
+
+
+```{r Bloque para representar la llegada de turistas internacionales por meses, variación Octubre 2015 a Abril 2017}
+
+Ft_dt <- data.table(df_Frontur)
+
+Total <- sum(df_Frontur$Viajeros)
+
+Ft_dt2 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes")]
+  
+Ft_dt2
+
+```
+
+
+Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017 y Destino_CCAA.
+
+```{r Bloque el número de turistas internacionales por meses y Destino_CCAA }
+
+Ft_dt3 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes", "Destino_CCAA")]
+
+Ft_dt3
+
+```
+
