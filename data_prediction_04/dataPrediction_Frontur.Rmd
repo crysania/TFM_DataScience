@@ -24,6 +24,10 @@ library(dplyr)<br>
 library(ggplot2)<br>
 library(reshape2)<br>
 library(data.table)<br>
+library(effects)<br>
+library(ROCR)<br>
+library(stats)<br>
+library(randomForest)<br>
 
 ```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -37,6 +41,11 @@ library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(data.table)
+library(effects)
+library(ROCR)
+library(stats)
+library(randomForest)
+
 
 
 ```
@@ -44,24 +53,84 @@ library(data.table)
 
 # Predicción de los datos
 
-Construimos un modelo RFM para el año 2015, con las variables Recencia, Frecuencia y Monetización, que
-definiremos para cada cliente de la siguiente forma:
+##Aprendizaje automático
 
-  - Recencia: Dias transcurridos entre la última compra y el final del periodo analizado.
-  - Frecuencia: Número de operaciones realizadas en dicho periodo.
-  - Monetización: Media de los importes de las ventas realizadas en este periodo.
+Los algoritmos de aprendizaje automático emplean métodos de cálculo para "aprender" información directamente a partir de los datos sin asumir una ecuación predeterminada como modelo.
+
+##Regresión
+
+Mediante las técnicas de regresión, se puede modelizar una variable de respuesta continua como una función de uno o más predictores.
+
+Existen diversos algoritmos de regresión, tales como regresión lineal, modelos lineales generalizados, regresión no lineal y modelos de efectos mixtos.
   
+<b>Regresión lineal</b>
+
+La regresión lineal es una técnica de modelización estadística que se emplea para describir una variable de respuesta continua a modo de función de una o varias variables predictivas. Puede ayudar a comprender y predecir el comportamiento de sistemas complejos o a analizar datos experimentales, financieros y biológicos. 
+
+Existen varios tipos de modelos de regresión y métodos de ajuste lineales, entre los que se encuentran:
+
+- Simple: modelo con un único predictor.
+- Múltiple: modelo con varios predictores.
+- Multivariante: modelo con varias variables de respuesta.
+- Robusta: modelo con valores atípicos.
+- Por pasos sucesivos: modelo con selección automática de variables.
+- Regularizada: modelo que admite predictores redundantes y evita el sobreajuste mediante algoritmos ridge, lasso y elastic net.
+
+
+<b>Regresión no lineal</b>
+
+La regresión no lineal es una técnica de modelización estadística que ayuda a describir relaciones no lineales en datos experimentales. Se suele considerar que los modelos de regresión no lineal son paramétricos, es decir, que el modelo se describe en forma de ecuación no lineal.
+
+
+<b>Modelos lineales generalizados</b>
+
+Los modelos lineales generalizados son un caso especial de modelos no lineales que emplean métodos lineales. Permiten que las variables de respuesta tengan distribuciones no normales y una función de vínculo que describe cómo se relaciona el valor esperado de la respuesta con los predictores lineales. 
+
+Existen varios tipos de modelos lineales generalizados con las siguientes distribuciones de respuesta:
+
+- Normal
+- Binomial (regresión probit o logística)
+- Poisson
+- Gamma
+- Gaussiana inversa
+
+<b>Modelos de efectos mixtos</b>
+
+Los modelos de efectos mixtos lineales y no lineales son generalizaciones de modelos lineales y no lineales para datos recopilados y agrupados. Estos modelos describen la relación entre una variable de respuesta y las variables independientes, con coeficientes que pueden variar con respecto a una o varias variables de agrupación.
+
+
+##Evaluación de modelos
+
+Se evaluan los modelos para algoritmos de regresión mediante tests de significancia estadística y medidas de bondad de ajuste, tales como:
+
+<b>Estadístico F y estadístico T</b>
+<b>R2 y R2 ajustada</b>
+<b>Error cuadrático medio con validación cruzada</b>
+<b>Criterio de la información de Akaike (AIC) y criterio de la información bayesiano (BIC)</b>
+
+Es posible calcular los intervalos de confianza tanto para coeficientes de regresión como para valores predichos.
+
+##Evaluación de la bondad del ajuste
+
+Se realiza para evaluar hasta qué punto se ajusta un conjunto de datos a una determinada distribución.
+
+Es posible generar gráficos de probabilidad a partir de conjuntos de datos completos y de conjuntos de datos censurados. Asimismo, puede utilizar gráficos Q-Q para evaluar qué tal se ajusta una distribución dada a una distribución normal estándar.
+
+Existen los tests de hipótesis para determinar si un conjunto de datos es coherente con distintas distribuciones de probabilidad. Entre los tests de distribución específicos se incluyen:
+
+<b>Tests de Anderson-Darling</b>
+<b>Tests de Kolmogorov-Smirnov de una cola y de dos colas</b>
+<b>Tests de bondad del ajuste chi-square </b>
+<b>Tests de Lilliefors</b>
+<b>Tests de Ansari-Bradley</b>
+<b>Tests de Jarque-Bera</b>
+<b>Tests de Durbin-Watson</b>
 
 ```{r echo=FALSE, results="hide",warning=FALSE,message=FALSE}
 # Establecemos una semilla
 set.seed(1234)
 
 ```
-
-
-
-
-
 
 
 ```{r  Bloque de carga de datos Frontur.csv, Paises.csv y CCAA.csv}
@@ -85,7 +154,7 @@ Se formatea los datos a los tipos adecuados:
 
 ```{r data format}
 
-df_Frontur$Viajeros<-as.numeric(df_Frontur$Viajeros)
+df_Frontur$Viajeros<-as.double(df_Frontur$Viajeros)
 
 df_Frontur$Tipo_Viajero<-as.factor(df_Frontur$Tipo_Viajero)
 df_Frontur$Via_Entrada<-as.factor(df_Frontur$Via_Entrada)
@@ -124,192 +193,62 @@ str(df_Frontur)
 ```
 
 
-Se procede a comparar los datos obtenidos del dataset, con la documentacion del INE (fichero /data_01/Frontur/Diseño_Frontur_OpenData.xlsx en ), para detectar posibles datos nulos, outliers o datos erróneos.
-
-Se detecta que los levels de las columnas (Pais, Destino y Motivo), no coinciden con los de la documentación, por lo que se procede a la revisión de los mismos.
 
 
+```{r  Bloque de test de diferencia de medias mediante regresion lineal}
 
-```{r Bloque revision de los valores de los paises de residencia}
-
-head(df_Frontur$Pais)    
-
-```
-Se detecta que no tiene el valor 3 que corresponde con España, por lo tanto es correcto que solo haya 15 valores.
-
-
-```{r Bloque revision de los valores de los destinos de CCAA}
-
-head(df_Frontur$Destino_CCAA)
+t.test(Viajeros ~ Tipo_Viajero, data = df_Frontur)
 
 ```
 
-No aparece Melilla (código = 19) como Destino principal del viaje, en cambio, como dato curioso Ceuta sí que aparece.
 
 
-```{r }
 
-head(df_Frontur$Motivo) 
+
+```{r  Bloque  regresion lineal Destino_CCAA}
+
+modeloF1=lm(Viajeros ~ Destino_CCAA ,  data=df_Frontur)
+summary(modeloF1)
+
+
 
 ```
 
-En el caso de los motivos del viaje, se detecta que el valor 0 que significa "no procede" no aparece en ningún registro del dataset.
+```{r  Bloque  regresion lineal Pais}
 
+modeloF2=lm(Viajeros ~ Pais ,  data=df_Frontur)
+summary(modeloF2)
 
-
-# Valores perdidos (missing values) 
-
-
-El tratamiento de los datos es fundamental para la correcta interpretación de un análisis, los valores perdidos son aquellos que simplemente se ha perdido algún dato y no sabemos qué valor toma, se representa por el código: NA (Not available).
-
-Hay muchas funciones para identificar estos valores, la más usada es is.na(), en este dataset no existen valores NaN ni NA.
-
-
-```{r  is.na() }
-
-sapply(df_Frontur,function(x) sum(is.na(x)))
 
 
 ```
 
 
-# Análisis descriptivo de los datos
 
-```{r Bloque estadistica del dataset}
+```{r  Bloque  regresion lineal Mes}
 
-summary(df_Frontur)
+modeloF3=lm(Viajeros ~ Mes ,  data=df_Frontur)
+summary(modeloF3)
 
-```
-
-
-Total de turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017, son 169.385.169 y de media 170.3478
-
-```{r Bloque total turistas}
-
-summarize(df_Frontur, total = sum(df_Frontur$Viajeros, na.rm = T), media = mean(df_Frontur$Viajeros, na.rm = T))
-
-
-```
-
-Llegada de turistas internacionales por país de residencia, porcentaje respecto al total.
-
-```{r Bloque turistas mensuales que vienen a España por Pais de Residencia}
-
-res <- ddply(df_Frontur, .(Pais), summarize, Total = sum(Viajeros))
-
-res2 <- ddply(res, .(Pais, Total), transform, pct= 100 * Total / sum(df_Frontur$Viajeros))
-res2
-
-df_merge  <- inner_join(res2,df_Paises)
-df_merge
-
-
-``` 
-
-Se representa de forma gráfica con un diagrama de barras, la llegada de turistas internacionales por país de residencia en porcentajes al total.
-
-Francia es el principal país de residencia con 48.070.653 turistas durante el periodo de estudio, lo que representa el 28 % del total.
-
-Reino Unido y Alemania son los siguientes países de residencia con más turistas que visitan España.
-
-```{r Bloque para representar datos}
-
-df_merge<-df_merge[order(df_merge$Total,decreasing=T),]
-
-df_merge
-
-``` 
-
-
-```{r Bloque para representar las graficas Paises}
-
-ggplot(data=df_merge, aes(y=pct, x=Nombre)) +
-  geom_bar(stat="identity", fill="steelblue",  width=0.9) +
-   labs(x = "Paises de residencia", y = "Porcentaje de turistas")+
-  coord_flip() +
-  theme_minimal()
-
-   
-
-
-``` 
-
-
-
-
-Se representa de forma gráfica con un diagrama de barras,las Comunidades Autónomas de destino principal, porcentaje respecto al total.
-
-Cataluña es el principal destino principal de los turistas con 40294779.77 turistas durante el periodo de estudio, lo que representa el 24 % del total.
-
-Canarias (13%) y Andalucía (11%) son las siguientes Comunidades Autónomas con más turistas que visitan España.
-
-```{r Bloque turistas mensuales que vienen a España}
-
-res3 <- ddply(df_Frontur, .(Destino_CCAA), summarize, Total = sum(Viajeros))
-
-res4 <- ddply(res3, .(Destino_CCAA, Total), transform, pct= 100 * Total / sum(df_Frontur$Viajeros))
-res4
-
-
-df_mergeCCAA  <- inner_join(res4,df_CCAA)
-
-df_mergeCCAA <- df_mergeCCAA[order(df_mergeCCAA$Total,decreasing=T),]
-
-df_mergeCCAA
-
-``` 
-
-
-
-
-```{r Bloque para representar las graficas CCAA}
-
-ggplot(data=df_mergeCCAA, aes(y=pct, x=CCAA)) +
-  geom_bar(stat="identity", fill="steelblue",  width=0.9) +
-   labs(x = "Comunidades Autónomas", y = "Porcentaje de turistas")+
-  coord_flip() +
-  theme_minimal()
-
- 
-```   
-
-Se utiliza un ggplot para representar la relación entre Viajeros, Destino_CCAA y año del estudio.
-
-En el 2015 se detecta que Cataluña es la CCAA más visitada, para el 2016 es la Comunidad de Madrid y en el 2017 es Castilla y León.
-
-```{r Bloque para representar ggplot}
-
-
-  ggplot(df_Frontur, aes(x = Destino_CCAA, y = Viajeros, col=df_Frontur$Anyo)) +
-    geom_point() + geom_smooth() 
 
 
 ```
 
 
-Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017.
+```{r  Bloque  regresion lineal Anyo}
+
+modeloF4=lm(Viajeros ~ Anyo ,  data=df_Frontur)
+summary(modeloF4)
 
 
-```{r Bloque para representar la llegada de turistas internacionales por meses, variación Octubre 2015 a Abril 2017}
-
-Ft_dt <- data.table(df_Frontur)
-
-Total <- sum(df_Frontur$Viajeros)
-
-Ft_dt2 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes")]
-  
-Ft_dt2
 
 ```
 
 
-Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017 y Destino_CCAA.
 
-```{r Bloque el número de turistas internacionales por meses y Destino_CCAA }
+```{r  Bloque  regresion lineal Multi}
 
-Ft_dt3 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes", "Destino_CCAA")]
 
-Ft_dt3
+
 
 ```
-
