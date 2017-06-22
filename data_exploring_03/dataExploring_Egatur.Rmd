@@ -16,32 +16,46 @@ output:
 ---
 <br></br>
 
+<br></br>
 
-# Set working directory
 
-```{r setwd}
+# Se establece el directorio de trabajo y las librerías necesarias
+
+library(plyr)<br>
+library(dplyr)<br>
+library(ggplot2)<br>
+library(reshape2)<br>
+library(data.table)<br>
+
+```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
+
+#Limpiamos el workspace
+rm(list=ls())
+
 setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
+
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(data.table)
+
 
 ```
 
-# DataExploring
+# Exploración de los datos
 
- 
-# DataExploring
+En este script del TFM, se va a hacer una exploración y transformación de los datos obtenidos del INE para poder plantear una solución, a partir de los mismos, para adecuarlos al problema de modelado que se quiere resolver.
 
-El segundo paso del TFM, consiste en hacer una exploración de los datos obtenidos del INE, para poder plantear una solución a partir de los mismos.
+En esta fase se procede, a partir del fichero csv generado en la etapa anterior "data_Cleaning", a la generación de nuevos registros o valores transformados de atributos existentes, si fuera necesario, en función de los requerimientos para preparar la entrada a las herramientas de modelado.
 
-En esta fase se procede a la construcción de datos, a partir de los datos originalmente capturados, se generan si es necesario, atributos derivados, nuevos registros o valores transformados de atributos existentes, en función de los requerimientos para preparar la entrada a las herramientas de modelado.
+Cabe recordar que los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
 
-Los datos son la representación simbólica (numérica, alfabética,...) de un atributo o variable cuantitativa o cualitativa.
+Se procede a dar formato a los datos, estas transformaciones se refieren a modificaciones sintácticas que se hacen sobre ellos, sin alterar su significado pero que pueden ser requeridas por la herramienta de modelado a utilizar.
 
-Se podrá dar formato a datos, estas transformaciones se refieren a modificaciones sintácticas que se hacen sobre los datos, sin alterar su significado pero que pueden ser requeridas por la herramienta de modelado a utilizar. Por ejemplo, puede que haya requisitos en el orden de los atributos, o que la herramienta de modelado requiera que los registros estén ordenados según el atributo resultado. 
+Puede que haya requisitos en el orden de los atributos o que los registros estén ordenados según el atributo resultado, mediante la evaluación de la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
 
-Esta etapa se centra en evaluar la información disponible y refinar la pregunta inicial para evitar resultados ambiguos, sesgos o detectar la necesidad de recopilar nuevos datos.
-
-El período de tiempo que se va a utilizar en el TFM, será desde Abril del 2016 hasta Marzo del 2017 (12 meses).
-
-En cada fichero cada registro representa a un viajero que finaliza su viaje por España en el mes de referencia
+El período de tiempo que se va a utilizar en el TFM, será desde Octubre del 2015 hasta Abril del 2017 (19 meses).
 
 La variable que identifica de manera única cada registro es A0_1.
 
@@ -54,10 +68,153 @@ La estimación de las pernoctaciones, resultante de multiplicar la variable ‘A
 Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas.
 
 
+El fichero Paises.csv se relacionan los códigos de cada país, con el nombre del País de resisdencia habitual del turista.
 
-```{r leer datos de Egatur.csv}
+El fichero CCAA.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principial del viaje.
 
 
+```{r  Bloque de carga de datos Egatur.csv, Paises.csv y CCAA.csv}
+
+dsEgatur <- read.table("../data_cleaning_02/Egatur.csv", header = T, sep = "," , fileEncoding = "latin1")
+head(dsEgatur)
+
+df_Paises <- read.table("../data_cleaning_02/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
+df_Paises
+
+df_CCAA <- read.table("../data_cleaning_02/CCAA.csv", header = T, sep = ";",  fileEncoding="utf-8")
+df_CCAA
+
+```
+
+# Formateo de los datos
+
+Se formatea los datos a los tipos adecuados:
+  1. Tipos numéricos (Viajeros, pernoctaciones y gasto_total)
+  2. Tipos alfanuméricos (Id)
+  3. Tipos Categóricos 
+  
+
+
+```{r data format}
+
+dsEgatur$Id<-as.character(dsEgatur$Id)
+
+dsEgatur$Viajeros<-as.numeric(dsEgatur$Viajeros)
+dsEgatur$Gasto_Total<-as.numeric(dsEgatur$Gasto_Total)
+dsEgatur$Gasto_Real <- (dsEgatur$Viajeros * dsEgatur$Gasto_Total)
+dsEgatur$Pernoctaciones<-as.numeric(dsEgatur$Pernoctaciones)
+dsEgatur$Pernoctaciones_Real <- (dsEgatur$Pernoctaciones * dsEgatur$Viajeros)
+
+dsEgatur$Tipo_Viajero<-as.factor(dsEgatur$Tipo_Viajero)
+dsEgatur$Via_Salida<-as.factor(dsEgatur$Via_Salida)
+dsEgatur$Pais<-as.factor(dsEgatur$Pais)
+dsEgatur$Destino_CCAA<-as.factor(dsEgatur$Destino_CCAA)
+
+dsEgatur$Alojamiento<-as.factor(dsEgatur$Alojamiento)
+dsEgatur$Motivo<-as.factor(dsEgatur$Motivo)
+dsEgatur$Paquete_Turistico<-as.factor(dsEgatur$Paquete_Turistico)
+dsEgatur$Mes<-as.factor(dsEgatur$Mes)
+dsEgatur$Anyo<-as.factor(dsEgatur$Anyo)
+
+head(dsEgatur)
+
+df_Paises$Pais<-as.factor(df_Paises$Pais)
+
+df_CCAA$Codigo<-as.factor(df_CCAA$Codigo)
+colnames(df_CCAA)[colnames(df_CCAA)=="Codigo"] <- "Destino_CCAA"
+
+```
+
+# Revisión de los datos del fichero csv
+
+En este bloque se realiza una revisión de los datos para detectar. 
+
+```{r Bloque de revisión basica del dataset}
+
+head(dsEgatur)
+tail(dsEgatur)
+nrow(dsEgatur)
+ncol(dsEgatur)
+str(dsEgatur)
+
+```
+
+Se procede a comparar los datos obtenidos del dataset, con la documentacion del INE (fichero /data_01/Egatur/disreg_egatur16.xlsx en ), para detectar posibles datos nulos, outliers o datos erróneos.
+
+No se encuentran anomalías en los datos, no se encuentran valores extraños, nulos o erróneos.
+
+
+# Valores perdidos (missing values) 
+
+
+El tratamiento de los datos es fundamental para la correcta interpretación de un análisis, los valores perdidos son aquellos que simplemente se ha perdido algún dato y no sabemos qué valor toma, se representa por el código: NA (Not available).
+
+Hay muchas funciones para identificar estos valores, la más usada es is.na(), en este dataset no existen valores NaN ni NA.
+
+
+```{r  is.na() }
+
+sapply(dsEgatur,function(x) sum(is.na(x)))
 
 
 ```
+
+
+# Análisis descriptivo de los datos
+
+```{r Bloque estadistica del dataset}
+
+summary(dsEgatur)
+
+```
+
+Para estimar el gasto turístico debe utilizarse la variable ‘gastototal’ multiplicada por el factor de elevación de cada registro (‘Factor_Egatur’), para los turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017 es 111.760.512.068	euros con 109.072.379 de turistas.
+
+
+El gasto medio por persona, se obtendrá como el cociente del gasto turístico entre los turistas, calculados sumando la variable ‘Factor_Egatur’, para los datos es 1024.645 euros.
+
+La estimación de las pernoctaciones, resultante de multiplicar la variable ‘A13’ por ‘Factor_Egatur’, se utiliza como denominador del gasto medio diario, siendo el numerador el gasto turístico. 
+
+Número total de pernoctaciones 861.891.254, cuyo gasto medio diario es 129.6689 euros.
+
+Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas, siendo para los datos de este TFM 0.12655 días.
+
+
+```{r Bloque total turistas y gasto}
+
+totalG = summarize(dsEgatur, totalG = sum(dsEgatur$Gasto_Real, na.rm = T), na.rm = T)
+totalG
+
+totalT= summarize(dsEgatur, totalT = sum(dsEgatur$Viajeros, na.rm = T), na.rm = T)
+totalT
+
+gasto_Medio = (totalG / totalT)
+gasto_Medio
+
+
+totalP= summarize(dsEgatur, totalP = sum(dsEgatur$Pernoctaciones_Real, na.rm = T), na.rm = T)
+totalP
+
+gasto_Medio_Diario = totalG / totalP
+gasto_Medio_Diario
+
+duracion_Media = totalT/totalP
+duracion_Media
+
+```
+
+
+Gasto de turistas internacionales por país de residencia, porcentaje respecto al total.
+
+```{r Bloque turistas mensuales que vienen a España por Pais de Residencia}
+
+res <- ddply(dsEgatur, .(Pais), summarize, Total = sum(Gasto_Total))
+
+res2 <- ddply(res, .(Pais, Total), transform, pct= 100 * Total / sum(dsEgatur$Gasto_Total))
+res2
+
+df_merge  <- inner_join(res2,df_Paises)
+df_merge
+
+
+``` 
