@@ -67,21 +67,21 @@ La estimación de las pernoctaciones, resultante de multiplicar la variable ‘A
 
 Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas.
 
+El fichero PaisesE.csv se relacionan los códigos de cada país, con el nombre del País de resisdencia habitual del turista.
 
-El fichero Paises.csv se relacionan los códigos de cada país, con el nombre del País de resisdencia habitual del turista.
-
-El fichero CCAA.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principial del viaje.
+El fichero CCAAE.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principial del viaje.
 
 
 ```{r  Bloque de carga de datos Egatur.csv, Paises.csv y CCAA.csv}
 
-dsEgatur <- read.table("../data_cleaning_02/Egatur.csv", header = T, sep = "," , fileEncoding = "latin1")
+dsEgatur <- read.table("../data_cleaning_02/Egatur.csv", header = T, sep = "," , fileEncoding ="utf-8")
+
 head(dsEgatur)
 
-df_Paises <- read.table("../data_cleaning_02/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
+df_Paises <- read.table("../data_cleaning_02/PaisesE.csv", header = T, sep = ";",   fileEncoding="utf-8")
 df_Paises
 
-df_CCAA <- read.table("../data_cleaning_02/CCAA.csv", header = T, sep = ";",  fileEncoding="utf-8")
+df_CCAA <- read.table("../data_cleaning_02/CCAAE.csv", header = T, sep = ";",  fileEncoding="utf-8")
 df_CCAA
 
 ```
@@ -101,9 +101,10 @@ dsEgatur$Id<-as.character(dsEgatur$Id)
 
 dsEgatur$Viajeros<-as.numeric(dsEgatur$Viajeros)
 dsEgatur$Gasto_Total<-as.numeric(dsEgatur$Gasto_Total)
-dsEgatur$Gasto_Real <- (dsEgatur$Viajeros * dsEgatur$Gasto_Total)
+dsEgatur$Gasto_Real <- as.numeric(0)
 dsEgatur$Pernoctaciones<-as.numeric(dsEgatur$Pernoctaciones)
-dsEgatur$Pernoctaciones_Real <- (dsEgatur$Pernoctaciones * dsEgatur$Viajeros)
+dsEgatur$Pernoctaciones_Real <- as.numeric(0)
+
 
 dsEgatur$Tipo_Viajero<-as.factor(dsEgatur$Tipo_Viajero)
 dsEgatur$Via_Salida<-as.factor(dsEgatur$Via_Salida)
@@ -127,7 +128,7 @@ colnames(df_CCAA)[colnames(df_CCAA)=="Codigo"] <- "Destino_CCAA"
 
 # Revisión de los datos del fichero csv
 
-En este bloque se realiza una revisión de los datos para detectar. 
+En este bloque se realiza una revisión del dataset.
 
 ```{r Bloque de revisión basica del dataset}
 
@@ -139,9 +140,9 @@ str(dsEgatur)
 
 ```
 
-Se procede a comparar los datos obtenidos del dataset, con la documentacion del INE (fichero /data_01/Egatur/disreg_egatur16.xlsx en ), para detectar posibles datos nulos, outliers o datos erróneos.
 
-No se encuentran anomalías en los datos, no se encuentran valores extraños, nulos o erróneos.
+
+Se procede a comparar los datos obtenidos del dataset, con la documentacion del INE (fichero /data_01/Egatur/disreg_egatur16.xlsx en ), para detectar posibles datos nulos, outliers o datos erróneos.
 
 
 # Valores perdidos (missing values) 
@@ -149,16 +150,37 @@ No se encuentran anomalías en los datos, no se encuentran valores extraños, nu
 
 El tratamiento de los datos es fundamental para la correcta interpretación de un análisis, los valores perdidos son aquellos que simplemente se ha perdido algún dato y no sabemos qué valor toma, se representa por el código: NA (Not available).
 
-Hay muchas funciones para identificar estos valores, la más usada es is.na(), en este dataset no existen valores NaN ni NA.
+Hay muchas funciones para identificar estos valores, la más usada es is.na().
+
+Para el fichero Egatur se han detectado 4 valores NA en la columna de Viajeros.
+
 
 
 ```{r  is.na() }
 
 sapply(dsEgatur,function(x) sum(is.na(x)))
 
+```
+
+Por lo tanto para tener problemas en los cálculos de los datos, se van a sustituir por un 0 los NA (esta variable es numérica).
+
+```{r  eliminar los NA }
+
+dsEgatur$Viajeros[is.na(dsEgatur$Viajeros)]<-0
+
+sapply(dsEgatur,function(x) sum(is.na(x)))
 
 ```
 
+En cambio no existen valores NaN en el dataset.
+
+
+```{r Bloque nan}
+
+
+sapply(dsEgatur,function(x) sum(is.nan(x)))
+
+```
 
 # Análisis descriptivo de los datos
 
@@ -166,55 +188,232 @@ sapply(dsEgatur,function(x) sum(is.na(x)))
 
 summary(dsEgatur)
 
+
+
 ```
 
-Para estimar el gasto turístico debe utilizarse la variable ‘gastototal’ multiplicada por el factor de elevación de cada registro (‘Factor_Egatur’), para los turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017 es 111.760.512.068	euros con 109.072.379 de turistas.
 
 
-El gasto medio por persona, se obtendrá como el cociente del gasto turístico entre los turistas, calculados sumando la variable ‘Factor_Egatur’, para los datos es 1024.645 euros.
-
-La estimación de las pernoctaciones, resultante de multiplicar la variable ‘A13’ por ‘Factor_Egatur’, se utiliza como denominador del gasto medio diario, siendo el numerador el gasto turístico. 
-
-Número total de pernoctaciones 861.891.254, cuyo gasto medio diario es 129.6689 euros.
-
-Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas, siendo para los datos de este TFM 0.12655 días.
 
 
-```{r Bloque total turistas y gasto}
+Para estimar el gasto turístico debe utilizarse la variable ‘gasto_total’ multiplicada por el factor de elevación de cada registro (‘Viajeros’).
 
-totalG = summarize(dsEgatur, totalG = sum(dsEgatur$Gasto_Real, na.rm = T), na.rm = T)
+La estimación real de las pernoctaciones, se obtiene multiplicando la variable ‘Pernoctaciones’ por ‘Viajeros'.
+
+
+```{r Bloque totales reales}
+
+dsEgatur$Gasto_Real <-  as.numeric(dsEgatur$Viajeros * dsEgatur$Gasto_Total)
+
+dsEgatur$Pernoctaciones_Real <- as.numeric(dsEgatur$Pernoctaciones * dsEgatur$Viajeros)
+
+head(dsEgatur)
+
+```
+
+
+
+Los turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017 se gastan 111.760.512.068 euros.
+
+```{r Bloque total Gasto}
+
+totalG = summarize(dsEgatur, totalG = sum(dsEgatur$Gasto_Real, na.rm = T))
 totalG
 
-totalT= summarize(dsEgatur, totalT = sum(dsEgatur$Viajeros, na.rm = T), na.rm = T)
+
+```
+
+
+Se calcula el número total de turistas que vienen a España según los datos de Egatur 109.072.379 de turistas.
+
+```{r Bloque total turistas }
+
+
+totalT= summarize(dsEgatur, totalT = sum(dsEgatur$Viajeros, na.rm = T))
 totalT
 
-gasto_Medio = (totalG / totalT)
+```
+
+
+
+El gasto medio por persona, se obtendrá como el cociente del gasto turístico entre los turistas, calculados sumando la variable ‘Viajeros’ --> 1024.645 euros.
+
+
+```{r Bloque gasto medio de los turistas}
+
+
+gasto_Medio <-  (totalG[,"totalG"]/totalT[,"totalT"])
 gasto_Medio
 
 
-totalP= summarize(dsEgatur, totalP = sum(dsEgatur$Pernoctaciones_Real, na.rm = T), na.rm = T)
+```
+
+
+La estimación de las pernoctaciones, resultante de multiplicar la variable ‘A13’ por ‘Factor_Egatur’, se utiliza como denominador del gasto medio diario, siendo el numerador el gasto turístico. 
+
+
+```{r Bloque pernoctaciones totales}
+
+totalP= summarize(dsEgatur, totalP = sum(dsEgatur$Pernoctaciones_Real, na.rm = T))
 totalP
 
-gasto_Medio_Diario = totalG / totalP
+
+
+```
+
+Número total de pernoctaciones 861.891.254, cuyo gasto medio diario es 129.6689 euros.
+
+```{r Bloque pernoctaciones totales media}
+
+gasto_Medio_Diario = totalG[,"totalG"] / totalP[,"totalP"]
 gasto_Medio_Diario
 
-duracion_Media = totalT/totalP
+
+
+```
+
+Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas, siendo para los datos de este TFM 0.12655 noches
+
+```{r Bloque duracion media}
+
+duracion_Media = totalT[,"totalT"]/totalP[,"totalP"]
 duracion_Media
 
 ```
 
 
-Gasto de turistas internacionales por país de residencia, porcentaje respecto al total.
+Gasto de turistas internacionales por país de residencia y porcentaje respecto al total.
 
-```{r Bloque turistas mensuales que vienen a España por Pais de Residencia}
+Se detecta que los turistas que más gastan son los ingleses (20%), a continuación los alemanes (14%) y en tercer lugar los extranjeros del resto del mundo (11%).
 
-res <- ddply(dsEgatur, .(Pais), summarize, Total = sum(Gasto_Total))
+```{r Bloque gastos extrajeros que vienen a España por Pais de Residencia}
 
-res2 <- ddply(res, .(Pais, Total), transform, pct= 100 * Total / sum(dsEgatur$Gasto_Total))
+res <- ddply(dsEgatur, .(Pais), summarize, Total = sum(Gasto_Real))
+
+
+
+res2 <- ddply(res, .(Pais, Total), transform, pct= 100 * Total /totalG[,"totalG"])
 res2
 
 df_merge  <- inner_join(res2,df_Paises)
+df_merge<-df_merge[order(df_merge$Total,decreasing=T),]
 df_merge
+
+```
+
+
+```{r Bloque para representar las graficas Paises}
+
+ggplot(data=df_merge, aes(y=pct, x=Nombre)) +
+  geom_bar(stat="identity", fill="steelblue",  width=0.9) +
+   labs(x = "Paises de residencia", y = "Porcentaje de gasto")+
+  coord_flip() +
+  theme_minimal()
+
+   
 
 
 ``` 
+
+
+Gasto por Comunidades Autónomas y porcentaje respecto al total.
+
+Cataluña es el principal destino principal de los turistas con un gasto realizado de 24.949.885.499 euros durante el periodo de estudio, lo que representa el 22 % del total.
+
+Canarias (21%) y Andalucía (14%) son las siguientes Comunidades Autónomas con más gasto realizado en España.
+
+```{r Bloque gastos en España}
+
+res3 <- ddply(dsEgatur, .(Destino_CCAA), summarize, Total = sum(Gasto_Real))
+
+res4 <- ddply(res3, .(Destino_CCAA, Total), transform, pct= 100 * Total / totalG[,"totalG"])
+res4
+
+
+df_mergeCCAA  <- inner_join(res4,df_CCAA)
+
+df_mergeCCAA <- df_mergeCCAA[order(df_mergeCCAA$Total,decreasing=T),]
+
+df_mergeCCAA
+
+``` 
+
+
+```{r Bloque para representar las graficas CCAA}
+
+ggplot(data=df_mergeCCAA, aes(y=pct, x=CCAA)) +
+  geom_bar(stat="identity", fill="steelblue",  width=0.9) +
+   labs(x = "Comunidades Autónomas", y = "Porcentaje de gasto")+
+  coord_flip() +
+  theme_minimal()
+   
+
+
+``` 
+
+
+El mes con mayor gasto económico de los turistas que visitaron España, fue Agosto del 2016 con 10.354.421.287 euros.
+
+
+```{r Bloque para representar la llegada de turistas internacionales por meses, variación Octubre 2015 a Abril 2017}
+
+Ft_dt <- data.table(dsEgatur)
+
+Ft_dt2 <- Ft_dt[, list(Gasto_Real = sum(Gasto_Real)), by = c("Anyo","Mes")]
+
+Ft_dt2 <- arrange(Ft_dt2,desc(Gasto_Real))
+
+head(Ft_dt2,10)
+
+
+```
+
+
+
+Se obtiene el gasto de turistas internacionales por meses y Destino_CCAA, variación temporal Octubre 2015 a Abril 2017.
+
+De los datos se obtiene que el mes de Julio de 2016 hubo el mayor gasto turístico de los viajeros extranjeros en Baleares y en segunda posición Cataluña.
+
+
+```{r Bloque el gasto de turistas internacionales por meses y Destino_CCAA }
+
+Ft_dt3 <- Ft_dt[, list(Gasto_Real = sum(Gasto_Real)), by = c("Anyo","Mes", "Destino_CCAA")]
+
+Ft_dt3 <- arrange(Ft_dt3,desc(Gasto_Real))
+
+head(Ft_dt3,10)
+
+
+```
+
+
+
+Por el contrario en Enero del 2016, fue el periodo con menos gasto realizado, eligiendo Ceuta como destino.
+
+```{r menos visitas}
+tail(Ft_dt3,10)
+
+```
+
+
+Los ingleses son los extranjeros que más gastaron en España, durante el mes de Agosto del 2016 -> 2.312.129.733 euros
+
+
+```{r Bloque el gasto de turistas internacionales por meses, Pais }
+
+Ft_dt4 <- Ft_dt[, list(Gasto_Real = sum(Gasto_Real)), by = c("Anyo","Mes", "Pais")]
+
+Ft_dt4 <- arrange(Ft_dt4,desc(Gasto_Real))
+
+head(Ft_dt4,10)
+
+
+```
+
+En Abril del 2016 se ha dectectado que el gasto más bajo lo realizaron los portugueses --> 48.219.280 euros
+
+
+```{r menos gasto pais}
+tail(Ft_dt4,10)
+
+```

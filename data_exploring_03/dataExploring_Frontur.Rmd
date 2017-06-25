@@ -67,7 +67,7 @@ El fichero CCAA.csv contiene los códigos de las CCAA y su nombre correspondient
 
 ```{r  Bloque de carga de datos Frontur.csv, Paises.csv y CCAA.csv}
 
-df_Frontur <- read.table("../data_cleaning_02/Frontur.csv", header = T, sep = "," , fileEncoding = "latin1")
+df_Frontur <- read.table("../data_cleaning_02/Frontur.csv", header = T, sep = "," , fileEncoding = "utf-8")
 head(df_Frontur)
 
 df_Paises <- read.table("../data_cleaning_02/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
@@ -136,7 +136,7 @@ Se detecta que los levels de las columnas (Pais, Destino y Motivo), no coinciden
 head(df_Frontur$Pais)    
 
 ```
-Se detecta que no tiene el valor 3 que corresponde con España, por lo tanto es correcto que solo haya 15 valores.
+Se detecta que no tiene el valor 3 que corresponde con España, por lo tanto es correcto que solo haya 15 valores puesto que los datos son de turistas extranjeros.
 
 
 ```{r Bloque revision de los valores de los destinos de CCAA}
@@ -173,6 +173,13 @@ sapply(df_Frontur,function(x) sum(is.na(x)))
 
 ```
 
+```{r Bloque nan}
+
+
+sapply(df_Frontur,function(x) sum(is.nan(x)))
+
+```
+
 
 # Análisis descriptivo de los datos
 
@@ -181,6 +188,8 @@ sapply(df_Frontur,function(x) sum(is.na(x)))
 summary(df_Frontur)
 
 ```
+
+
 
 
 Total de turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017, son 169.385.169 y de media 170.3478
@@ -274,9 +283,9 @@ ggplot(data=df_mergeCCAA, aes(y=pct, x=CCAA)) +
  
 ```   
 
-Se utiliza un ggplot para representar la relación entre Viajeros, Destino_CCAA y año del estudio.
+Se utiliza un ggplot para representar la relación entre Viajeros, Destino_CCAA y año.
 
-En el 2015 se detecta que Cataluña es la CCAA más visitada, para el 2016 es la Comunidad de Madrid y en el 2017 es Castilla y León.
+
 
 ```{r Bloque para representar ggplot}
 
@@ -287,8 +296,7 @@ En el 2015 se detecta que Cataluña es la CCAA más visitada, para el 2016 es la
 
 ```
 
-
-Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017.
+El mes con mayor número de turistas que visitaron España fue Agosto del 2016.
 
 
 ```{r Bloque para representar la llegada de turistas internacionales por meses, variación Octubre 2015 a Abril 2017}
@@ -305,14 +313,14 @@ head(Ft_dt2,20)
 ```
 
 
-Se obtiene el número de turistas internacionales por meses, variación temporal Octubre 2015 a Abril 2017, Destino_CCAA y País.
+Se obtiene el número de turistas internacionales por meses y Destino_CCAA, variación temporal Octubre 2015 a Abril 2017. 
 
-De los datos se obtiene que el mes de Agosto de 2016 hubo la mayor cantidad de viajeros franceses que utilizaron España como país de Tránsito, pero también son los franceses en este mismo mes y año que eligieron Cataluña como destino turístico Español.
+De los datos se obtiene que el mes de Julio de 2016 hubo la mayor cantidad de viajeros que visitaron Cataluña como principal destino turístico nacional.
 
 
-```{r Bloque el número de turistas internacionales por meses, Pais y Destino_CCAA }
+```{r Bloque el número de turistas internacionales por meses y Destino_CCAA }
 
-Ft_dt3 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes", "Destino_CCAA", "Pais")]
+Ft_dt3 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes", "Destino_CCAA")]
 
 Ft_dt3 <- arrange(Ft_dt3,desc(Viajeros))
 
@@ -323,9 +331,33 @@ head(Ft_dt3,20)
 
 
 
-Por el contrario en Agosto del 2016, fue el periodo menos visitado eligiendo Cantabria como destino.
+Por el contrario en Abril del 2017, fue el periodo menos visitado eligiendo Ceuta como destino.
 
 ```{r menos visitas}
 tail(Ft_dt3,20)
+
+```
+
+Los franceses son los extranjeros que más visitaron España durante el mes de Agosto del 2016.
+
+
+```{r Bloque el número de turistas internacionales por meses, Pais }
+
+Ft_dt4 <- Ft_dt[, list(Viajeros = sum(Viajeros)), by = c("Anyo","Mes", "Pais")]
+
+Ft_dt4 <- arrange(Ft_dt4,desc(Viajeros))
+
+head(Ft_dt4,20)
+
+
+```
+
+
+En Octubre del 2015 se ha dectectado el número más bajo de visitantes, siendo Rusia el país de origen de los turistas.
+
+
+
+```{r menos visitas pais}
+tail(Ft_dt4,20)
 
 ```
