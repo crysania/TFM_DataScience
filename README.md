@@ -16,9 +16,10 @@ Los datos recopilados son de los últimos 19 meses, periodo entre Octubre del 20
 Objetivos del proyecto:
 
   1. Análisis descriptivo y predictivo de la actividad turística en España, para predecir el número de turistas por nacionalidades que          decidan viajar a un lugar determinado.
-  2. Segmentación de los turistas según el gasto turístico. 
-  3. Definir acciones de Marketing específicas para cada tipo de turista, según los resultados de los puntos anteriores, mediante acciones      publicitarias, así como lanzamiento de promociones especiales dirigidas a un turista objetivo.
-  4. Conocimiento holístico del turista.
+  
+  2. Segmentación de los turistas según características similares, para poder definir acciones de marketing específicas para cada tipo de        turista, acciones publicitarias, así como lanzamiento de promociones especiales dirigidas a un turista objetivo.
+  
+  3. Conocimiento holístico del turista.
  
   
 
