@@ -1,0 +1,158 @@
+---
+title: "Predicción de los datos en Egatur.csv"
+author: "Sandra de la Fuente"
+date: "30 de mayo de 2017"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 7
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 1
+  pdf_document:
+    toc: yes
+  word_document: default
+---
+<br></br>
+
+
+# Se establece el directorio de trabajo y las librerías necesarias
+
+library(plyr)<br>
+library(dplyr)<br>
+library(ggplot2)<br>
+library(reshape2)<br>
+library(data.table)<br>
+library(effects)<br>
+library(ROCR)<br>
+library(stats)<br>
+library(randomForest)<br>
+
+```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
+
+#Limpiamos el workspace
+rm(list=ls())
+
+setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
+
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(data.table)
+library(effects)
+library(ROCR)
+library(stats)
+library(randomForest)
+
+
+
+```
+
+
+# Predicción de los datos
+
+En este script se desarrolla el procedimiento para obtener la respuesta a uno de los objetivos de este TFM:
+
+ - Segmentación de los turistas según características similares.
+ 
+
+Para ello se utilizará el modelo RFM (Recencia, Frecuencia y Valor Monetario), que consiste en agrupar los registros en distintos clústers o segmentos, de acuerdo a criterios demográficos, comportamentales, o de negocio.
+
+
+La idea es crear distintos segmentos en base a cada una de las 3 variables que hacen al modelo RFM, siguiendo el orden de sus siglas:
+
+  - Recencia: Dias transcurridos entre la última visita y el final del periodo analizado.
+  - Frecuencia: Número de visitas realizadas en dicho periodo.
+  - Monetización: Media de los gastos turísticos realizadas en este periodo.
+  
+
+El resultado de la triple segmentación dará un grupo ganador que es el que define cuáles son los mejores turistas, es decir, “los turistas más propensos a gastar son aquellos que nos han visitado más recientemente, con más frecuencia y gastan más dinero”.
+
+
+Utilizar este modelo predictivo, consigue mejores resultados para las campañas de marketing por 2 motivos principales:
+
+  - Permite dirijirse a cada grupo de turistas con mensajes, frecuencia, y ofertas diferentes para optimizar los programas de comunicación para cada segmento y maximizar los resultados generales de las campañas.
+
+  - Conocimiento holístico del turista.
+  
+
+
+Se carga el fichero csv egaturRFM generado en la etapa anterior "Exploración de los datos".
+
+
+
+```{r  Bloque de carga de datos egaturRFM.csv}
+
+egaturRFM <- read.csv2("../data_exploring_03/egaturRFM.csv", header = T, sep = ",",   fileEncoding="utf-8")
+head(egaturRFM)
+
+
+```
+
+
+## Construcción del modelo
+
+Construimos un modelo RFM para el año 2015, con las variables Recencia, Frecuencia y Monetización, que
+definiremos para cada cliente de la siguiente forma:
+
+
+Bloque de extracción y preparación de datos, consiste en crear una variable fecha con la unión del mes y año, como no está informado el día, se define para todas las fechas 01.
+
+```{r Bloque de extracción y preparación de datos}
+
+egaturRFM$Fecha = as.Date(paste("01", as.numeric(egaturRFM$Mes), as.numeric(egaturRFM$Anyo), sep="-"),
+                      format = "%d-%m-%Y")
+
+egaturRFM$Mes = NULL
+
+egaturRFM$Anyo = NULL
+
+
+
+```
+
+
+Bloque de construcción de variables RFM.
+
+
+```{r Bloque de construcción de variables RFM}
+
+head(egaturRFM)
+
+tail(egaturRFM)
+
+```
+
+```{r Bloque de extracción y preparación de datos}
+
+str(egaturRFM)
+egaturRFM$Frequencia= 1
+summary(egaturRFM)
+
+
+```
+
+```{r Establecemos una semilla}
+ 
+set.seed(1234)
+
+
+```
+
+
+
+```{r RFM}
+QUARTER_4 = as.Date("2017-04-01")
+
+
+
+RFM = summarise(group_by(egaturRFM, Id), Recencia   = as.numeric(min(QUARTER_4 - Fecha, na.rm = TRUE)),
+                                           Frequency = sum(Frequencia, na.rm = TRUE),
+                                           Monetizacion  = mean(Gasto_Total, na.rm = TRUE)
+)
+
+
+
+```
