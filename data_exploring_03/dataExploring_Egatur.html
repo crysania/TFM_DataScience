@@ -438,6 +438,16 @@ head(dsEgatur)</code></pre>
 ## 4  147061.19           1143.7343
 ## 5   94504.58            655.0295
 ## 6  121706.27            911.6390</code></pre>
+<pre class="r"><code>egaturRFM &lt;- dsEgatur[c(1,12,13,14)]
+
+head(egaturRFM)</code></pre>
+<pre><code>##               Id Mes Anyo Gasto_Real
+## 1 0115EVA0000106   1 2017  276522.97
+## 2 0115EVA0000142   1 2017  163882.61
+## 3 0115EVA0000872   1 2017  183306.96
+## 4 0115EVA0001326   1 2017  147061.19
+## 5 0115EVA0001394   1 2017   94504.58
+## 6 0115EVA0001395   1 2017  121706.27</code></pre>
 <p>Los turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017 se gastan 111.760.512.068 euros.</p>
 <pre class="r"><code>totalG = summarize(dsEgatur, totalG = sum(dsEgatur$Gasto_Real, na.rm = T))
 totalG</code></pre>
@@ -653,6 +663,11 @@ head(Ft_dt4,10)</code></pre>
 ## 283 2015  11    7   37989711
 ## 284 2015  12    7   37577568
 ## 285 2017   1    7   31497325</code></pre>
+<p>Se genera un fichero en formato csv con los datos del dataset.</p>
+<pre class="r"><code>write.csv(egaturRFM,file=&quot;egaturRFM.csv&quot;,row.names = FALSE )
+write.csv(Ft_dt4,file=&quot;gasto_fec_pais.csv&quot;,row.names = FALSE )
+write.csv(Ft_dt3,file=&quot;gasto_fec_ccaa.csv&quot;,row.names = FALSE )
+write.csv(dsEgatur,file=&quot;dsEgatur_Final.csv&quot;,row.names = FALSE )</code></pre>
 </div>
 
 

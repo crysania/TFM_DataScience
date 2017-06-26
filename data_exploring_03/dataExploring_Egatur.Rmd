@@ -209,9 +209,17 @@ dsEgatur$Pernoctaciones_Real <- as.numeric(dsEgatur$Pernoctaciones * dsEgatur$Vi
 
 head(dsEgatur)
 
+
 ```
 
 
+```{r Bloque creacion del dataset para modelo RFM de prediccion}
+
+egaturRFM <- dsEgatur[c(1,12,13,14)]
+
+head(egaturRFM)
+
+```
 
 Los turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017 se gastan 111.760.512.068 euros.
 
@@ -415,5 +423,18 @@ En Abril del 2016 se ha dectectado que el gasto más bajo lo realizaron los port
 
 ```{r menos gasto pais}
 tail(Ft_dt4,10)
+
+```
+
+Se genera un fichero en formato csv con los datos del dataset.
+
+
+```{r file csv}
+
+write.csv(egaturRFM,file="egaturRFM.csv",row.names = FALSE )
+write.csv(Ft_dt4,file="gasto_fec_pais.csv",row.names = FALSE )
+write.csv(Ft_dt3,file="gasto_fec_ccaa.csv",row.names = FALSE )
+write.csv(dsEgatur,file="dsEgatur_Final.csv",row.names = FALSE )
+
 
 ```
