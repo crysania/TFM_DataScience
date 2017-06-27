@@ -27,7 +27,11 @@ library(data.table)<br>
 library(effects)<br>
 library(ROCR)<br>
 library(stats)<br>
-library(randomForest)<br>
+library(scales)<br>
+library(factoextra)<br>
+library(cluster)<br>
+library(NbClust)<br>
+
 
 ```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -35,6 +39,7 @@ library(randomForest)<br>
 rm(list=ls())
 
 setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
+install.packages("cluster")
 
 library(plyr)
 library(dplyr)
@@ -44,7 +49,10 @@ library(data.table)
 library(effects)
 library(ROCR)
 library(stats)
-library(randomForest)
+library(scales)
+library(factoextra)
+library(cluster)
+library(NbClust)
 
 
 
@@ -85,11 +93,76 @@ Se carga el fichero csv egaturRFM generado en la etapa anterior "Exploración de
 
 ```{r  Bloque de carga de datos egaturRFM.csv}
 
-egaturRFM <- read.csv2("../data_exploring_03/egaturRFM.csv", header = T, sep = ",",   fileEncoding="utf-8")
-head(egaturRFM)
+egaturRFM <- read.table("../data_exploring_03/egaturRFM.csv", header = T, sep = ",",   fileEncoding="utf-8")
+str(egaturRFM)
 
 
 ```
+
+Podemos apreciar que el dataset tiene 135149 registros con 4 variables de información del turista: el id del turista,el gasto total, el mes y el año del viaje.
+
+
+Se analiza los primeros registros del dataset para tener una primera impresión del contenido.
+
+```{r  Bloque de analisis del dataset}
+
+head(egaturRFM)
+
+```
+
+
+Y los últimos para detectar problemas en la carga de los datos, incongruencias con los nombres de los campos y sus contenidos.
+
+```{r  Bloque de analisis del dataset final}
+
+tail(egaturRFM)
+
+```
+
+Obtenemos los estadísticos de las variables para conocer de forma breve características básicas de los datos con los que estamos trabajando.
+
+```{r  Bloque de estadísticos de las variables}
+
+summary(egaturRFM)
+
+```
+
+
+Se crea dos variables nuevas:
+  - Fecha con la unión del mes y año, como no está informado el día, se define para todas las fechas 01.
+  - Frecuencia para el RFM, inicializada a 1.
+
+Se elimina las variables Mes y Anyo.
+
+
+
+```{r Bloque de extracción y preparación de datos}
+
+egaturRFM$Gasto_Total<-as.numeric(egaturRFM$Gasto_Total)
+
+egaturRFM$Fecha <- as.Date(paste("01", as.numeric(egaturRFM$Mes), as.numeric(egaturRFM$Anyo), sep="-"),
+                      format = "%d-%m-%Y")
+
+
+egaturRFM$Mes <- NULL
+egaturRFM$Anyo <- NULL
+
+egaturRFM$Frecuencia <-1
+
+```
+
+
+
+
+```{r Bloque de extracción y preparación de datos}
+
+str(egaturRFM)
+
+summary(egaturRFM)
+
+
+```
+
 
 
 ## Construcción del modelo
@@ -98,61 +171,98 @@ Construimos un modelo RFM para el año 2015, con las variables Recencia, Frecuen
 definiremos para cada cliente de la siguiente forma:
 
 
-Bloque de extracción y preparación de datos, consiste en crear una variable fecha con la unión del mes y año, como no está informado el día, se define para todas las fechas 01.
-
-```{r Bloque de extracción y preparación de datos}
-
-egaturRFM$Fecha = as.Date(paste("01", as.numeric(egaturRFM$Mes), as.numeric(egaturRFM$Anyo), sep="-"),
-                      format = "%d-%m-%Y")
-
-egaturRFM$Mes = NULL
-
-egaturRFM$Anyo = NULL
-
-
-
-```
-
-
-Bloque de construcción de variables RFM.
-
-
-```{r Bloque de construcción de variables RFM}
-
-head(egaturRFM)
-
-tail(egaturRFM)
-
-```
-
-```{r Bloque de extracción y preparación de datos}
-
-str(egaturRFM)
-egaturRFM$Frequencia= 1
-summary(egaturRFM)
-
-
-```
-
-```{r Establecemos una semilla}
- 
-set.seed(1234)
-
-
-```
-
-
-
 ```{r RFM}
-QUARTER_4 = as.Date("2017-04-01")
+FECHA_1 = as.Date("2017-04-01")
 
-
-
-RFM = summarise(group_by(egaturRFM, Id), Recencia   = as.numeric(min(QUARTER_4 - Fecha, na.rm = TRUE)),
-                                           Frequency = sum(Frequencia, na.rm = TRUE),
-                                           Monetizacion  = mean(Gasto_Total, na.rm = TRUE)
+RFM_EGATUR=summarise(group_by(egaturRFM[egaturRFM$Fecha<FECHA_1 & egaturRFM$Fecha>=FECHA_1-487,], Id),
+          RECENCIA = as.numeric(min(FECHA_1-Fecha, na.rm = TRUE)),
+          FRECUENCIA = sum(Frecuencia, na.rm = TRUE),
+          MONETIZACION =  sum(Gasto_Total, na.rm = TRUE)
 )
 
+```
 
+
+Se realizan varias gráficas para mostrar la densidad de los turistas a través del Modelo RFM.
+
+
+```{r Bloque Gráfico de Densidad Modelo RFM}
+
+
+
+smoothScatter(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA, xlab="FRECUENCIA", ylab="RECENCIA")
+smoothScatter(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION, xlab="FRECUENCIA",ylab="MONETIZACION")
+smoothScatter(RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION, xlab="RECENCIA",ylab="MONETIZACION")
+
+
+
+```
+
+En este bloque se realiza la segmentación mediante la normalización de los datos.
+
+A continuación se calculan los segmentos en función al numero de clusters.
+
+
+```{r Bloque de Segmentación mediante Modelo RFM}
+
+RFM_EGATUR_NORM=scale(RFM_EGATUR[,-1])
+
+NUM_CLUSTERS=2
+set.seed(1234)
+
+Modelo=kmeans(RFM_EGATUR_NORM,NUM_CLUSTERS)
+
+## SELECCIONAMOS LOS GRUPOS
+Segmentos=Modelo$cluster
+
+## MOSTRAMOS LA DISTRIBUCIÓN DE LOS GRUPOS
+table(Segmentos)
+
+## MOSTRAMOS LOS DATOS REPRESENTATIVOS DE LOS GRUPOS
+aggregate(RFM_EGATUR[,-1], by = list(Segmentos), mean)
+
+
+## CENTROS
+
+SEGMENTOS=aggregate(RFM_EGATUR[,-1], by = list(Segmentos), mean)
+SEGMENTOS$CONTADOR=table(Segmentos)
+NORMALIZACION_MEDIA=apply(RFM_EGATUR[,-1],MARGIN=2,FUN=mean)
+NORMALIZACION_SD=apply(RFM_EGATUR[,-1],MARGIN=2,FUN=sd)
+
+## Comprobación de los centroides construidos
+Modelo$centers[,1]*NORMALIZACION_SD[1]+NORMALIZACION_MEDIA[1]
+SEGMENTOS$RECENCIA
+
+
+```
+
+
+
+Otra forma más automatizada de implementación para el cálculo óptimo de clusters, cuyo objetivo es clasificar a los turistas según el gasto realizado, es el algoritmo del cálculo de la silueta.
+
+
+Este algoritmo se basa en calcular las distancias de cada elemento con su cluster, y con los clusteres vecinos, de forma que calcula un número de cluster que maximiza la primera distancia, y minimiza la segunda para el global de todos los elementos.
+
+
+```{r warning=FALSE,error=FALSE,message=FALSE}
+# Numero optimo de clusters (silhouette):
+k.max <- 10
+sil <- rep(0, k.max)
+
+# Calculo de la funcion silhouette para k = 2 .. 10 (clusters)
+for(i in 2:k.max){
+  km.res <- kmeans(RFM_EGATUR_NORM, centers = i, nstart = 25)
+  ss     <- silhouette(km.res$cluster, dist(v))
+  sil[i] <- mean(ss[, 3])
+}
+
+plot(1:k.max, sil, type = "b", pch = 19, frame = FALSE, xlab = "Numero de clusters", ylab = "Ancho medio de silueta")
+abline(v = which.max(sil), lty = 2)
+
+```
+
+Como podemos ver en el gráfico anterior, el número óptimo de clusters es 4, que corresponde con la máxima anchura media de silueta:
+```{r}
+sil
 
 ```
