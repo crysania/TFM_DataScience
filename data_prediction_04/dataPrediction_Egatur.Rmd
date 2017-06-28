@@ -17,29 +17,13 @@ output:
 <br></br>
 
 
-# Se establece el directorio de trabajo y las librerías necesarias
 
-library(plyr)<br>
-library(dplyr)<br>
-library(ggplot2)<br>
-library(reshape2)<br>
-library(data.table)<br>
-library(effects)<br>
-library(ROCR)<br>
-library(stats)<br>
-library(scales)<br>
-library(factoextra)<br>
-library(cluster)<br>
-library(NbClust)<br>
-
-
-```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
+```{r  librerias}
 
 #Limpiamos el workspace
 rm(list=ls())
 
 setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
-install.packages("cluster")
 
 library(plyr)
 library(dplyr)
@@ -154,7 +138,7 @@ egaturRFM$Frecuencia <-1
 
 
 
-```{r Bloque de extracción y preparación de datos}
+```{r Bloque de analisis de datos}
 
 str(egaturRFM)
 
@@ -185,29 +169,77 @@ RFM_EGATUR=summarise(group_by(egaturRFM[egaturRFM$Fecha<FECHA_1 & egaturRFM$Fech
 
 Se realizan varias gráficas para mostrar la densidad de los turistas a través del Modelo RFM.
 
+1. Gráfico de Densidad Modelo RFM RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA
 
-```{r Bloque Gráfico de Densidad Modelo RFM}
-
+```{r Bloque Gráfico de Densidad Modelo RFM RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA}
 
 
 smoothScatter(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA, xlab="FRECUENCIA", ylab="RECENCIA")
+
+
+```
+
+2. Gráfico de Densidad Modelo RFM FRECUENCIA,RFM_EGATUR$MONETIZACION
+
+```{r Bloque Gráfico de Densidad Modelo RFM FRECUENCIA,RFM_EGATUR$MONETIZACION}
+
+
 smoothScatter(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION, xlab="FRECUENCIA",ylab="MONETIZACION")
+
+```
+
+3. Gráfico de Densidad Modelo RFM RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION
+
+```{r Bloque Gráfico de Densidad Modelo RFM RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION}
+
 smoothScatter(RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION, xlab="RECENCIA",ylab="MONETIZACION")
 
 
 
 ```
 
-En este bloque se realiza la segmentación mediante la normalización de los datos.
 
-A continuación se calculan los segmentos en función al numero de clusters.
+Una forma más automatizada de implementación para el cálculo óptimo de clusters (eligiendo el número apropiado), es el método Elbow (método del codo), para este TFM el objetivo es clasificar en grupos a los turistas según el gasto realizado.
+
+Este método utiliza los valores de la inercia obtenidos tras aplicar el K-means a diferente número de Clusters (desde 1 a N Clusters), siendo la inercia la suma de las distancias al cuadrado de cada objeto del Cluster a su centroide.
+
+Una vez obtenidos los valores de la inercia tras aplicar el K-means de 1 a N Clusters, se representa en una gráfica lineal la inercia respecto del número de Clusters.
+
+En esta gráfica se debería de apreciar un cambio brusco en la evolución de la inercia, teniendo la línea representada una forma similar a la de un brazo y su codo. 
+
+El punto en el que se observa ese cambio brusco en la inercia dirá el número óptimo de Clusters a seleccionar para ese dataset; o dicho de otra manera, el punto que representaría al codo del brazo será el número óptimo de Clusters para ese dataset.
 
 
-```{r Bloque de Segmentación mediante Modelo RFM}
+
+```{r Metodo Elbow}
 
 RFM_EGATUR_NORM=scale(RFM_EGATUR[,-1])
 
-NUM_CLUSTERS=2
+mydata <- RFM_EGATUR_NORM
+wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
+for (i in 2:10) wss[i] <- sum(kmeans(mydata,
+                                     centers=i)$withinss)
+ 
+ 
+
+
+plot(1:10, wss, type = "b", pch = 19, frame = FALSE, xlab = "Numero de clusters", ylab = "Ancho medio de silueta")
+
+
+
+```
+
+En este bloque se realiza la segmentación mediante la normalización de los datos y se calculan los segmentos en función al número de clusters óptimos seleccionados según el método Elbow del paso anterior.
+
+Se hace una comparativa entre 3 y 4 clusters.
+
+Bloque de Segmentación mediante Modelo RFM para 3 Clusters.
+
+
+```{r Bloque de Segmentación mediante Modelo RFM para 3 clusters}
+
+
+NUM_CLUSTERS=3
 set.seed(1234)
 
 Modelo=kmeans(RFM_EGATUR_NORM,NUM_CLUSTERS)
@@ -234,35 +266,133 @@ Modelo$centers[,1]*NORMALIZACION_SD[1]+NORMALIZACION_MEDIA[1]
 SEGMENTOS$RECENCIA
 
 
-```
 
-
-
-Otra forma más automatizada de implementación para el cálculo óptimo de clusters, cuyo objetivo es clasificar a los turistas según el gasto realizado, es el algoritmo del cálculo de la silueta.
-
-
-Este algoritmo se basa en calcular las distancias de cada elemento con su cluster, y con los clusteres vecinos, de forma que calcula un número de cluster que maximiza la primera distancia, y minimiza la segunda para el global de todos los elementos.
-
-
-```{r warning=FALSE,error=FALSE,message=FALSE}
-# Numero optimo de clusters (silhouette):
-k.max <- 10
-sil <- rep(0, k.max)
-
-# Calculo de la funcion silhouette para k = 2 .. 10 (clusters)
-for(i in 2:k.max){
-  km.res <- kmeans(RFM_EGATUR_NORM, centers = i, nstart = 25)
-  ss     <- silhouette(km.res$cluster, dist(v))
-  sil[i] <- mean(ss[, 3])
-}
-
-plot(1:k.max, sil, type = "b", pch = 19, frame = FALSE, xlab = "Numero de clusters", ylab = "Ancho medio de silueta")
-abline(v = which.max(sil), lty = 2)
 
 ```
 
-Como podemos ver en el gráfico anterior, el número óptimo de clusters es 4, que corresponde con la máxima anchura media de silueta:
-```{r}
-sil
+Segmentos
+    1     2     3 
+51886 47228  6505 
+
+
+Centroides
+        1        2        3 
+371.4428 143.5544 168.3579 
+ 
+
+K-means clustering with 3 clusters of sizes 51886, 47228, 6505
+
+Cluster means:
+    RECENCIA FRECUENCIA MONETIZACION
+1  0.8487294 -0.2247463  -0.12171064
+2 -0.8418309 -0.2260034  -0.08203525
+3 -0.6578294  3.4334934   1.56640110
+
+
+Within cluster sum of squares by cluster:
+[1] 35158.89 31488.27 77779.78
+ (between_SS / total_SS =  54.4 %)
+ 
+ 
+ 
+
+Se puede apreciar la representación gráfica de la segmentación en el 2.Grafico Clustering Kmeans para 3 CLUSTERS del Modelo RFM.png
+
+```{r Bloque de Representación Gráfica Segmentación mediante Modelo RFM}
+
+
+
+png(paste("./2.Grafico Clustering Kmeans para ",NUM_CLUSTERS," CLUSTERS del Modelo RFM.png",sep=""),width = 1024, height = 880)
+par(mfrow=c(2, 2),oma = c(1, 0, 3, 0))
+plot(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA,col=Segmentos, xlab="FRECUENCIA", ylab="RECENCIA")
+plot(c(0,max(RFM_EGATUR$RECENCIA)),c(0,max(RFM_EGATUR$RECENCIA)), type="n", axes=F, xlab="", ylab="",xlim=c(0,max(RFM_EGATUR$RECENCIA)),ylim=c(0,max(RFM_EGATUR$RECENCIA)))
+legend(1,max(RFM_EGATUR$RECENCIA)/2-1,legend=c(1:NUM_CLUSTERS),yjust = 0.5,col=c(1:NUM_CLUSTERS),pch=15,cex=2)
+plot(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION,col=Segmentos, xlab="FRECUENCIA",ylab="MONETIZACION")
+plot(RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION,col=Segmentos, xlab="RECENCIA",ylab="MONETIZACION")
+mtext(paste("Clusterización kmeans de clientes mediante Modelo RFM 12 meses",sep=""), outer = TRUE, cex = 2)
+dev.off()
+
 
 ```
+
+
+ 
+ 
+
+Bloque de Segmentación mediante Modelo RFM para 4 Clusters.
+
+```{r Bloque de Segmentación mediante Modelo RFM para 4 clusters}
+
+
+NUM_CLUSTERS=4
+set.seed(1234)
+
+Modelo=kmeans(RFM_EGATUR_NORM,NUM_CLUSTERS)
+
+## SELECCIONAMOS LOS GRUPOS
+Segmentos=Modelo$cluster
+
+## MOSTRAMOS LA DISTRIBUCIÓN DE LOS GRUPOS
+table(Segmentos)
+
+## MOSTRAMOS LOS DATOS REPRESENTATIVOS DE LOS GRUPOS
+aggregate(RFM_EGATUR[,-1], by = list(Segmentos), mean)
+
+
+## CENTROS
+
+SEGMENTOS=aggregate(RFM_EGATUR[,-1], by = list(Segmentos), mean)
+SEGMENTOS$CONTADOR=table(Segmentos)
+NORMALIZACION_MEDIA=apply(RFM_EGATUR[,-1],MARGIN=2,FUN=mean)
+NORMALIZACION_SD=apply(RFM_EGATUR[,-1],MARGIN=2,FUN=sd)
+
+## Comprobación de los centroides construidos
+Modelo$centers[,1]*NORMALIZACION_SD[1]+NORMALIZACION_MEDIA[1]
+SEGMENTOS$RECENCIA
+
+
+
+```
+
+Segmentos
+    1     2     3     4 
+33196 30502 35494  6427 
+
+
+Centroides
+
+       1        2        3        4 
+411.8923 101.2221 262.4311 166.8360 
+
+K-means clustering with 4 clusters of sizes 33196, 30502, 35494, 6427
+
+Cluster means:
+     RECENCIA FRECUENCIA MONETIZACION
+1  1.14879851 -0.2238676   -0.2512577
+2 -1.15586748 -0.2260034   -0.1664799
+3  0.04004011 -0.2260034    0.1027447
+4 -0.66911923  3.4770236    1.5204450
+
+Within cluster sum of squares by cluster:
+[1] 11485.21 12278.13 29276.88 75409.35
+ (between_SS / total_SS =  59.5 %)
+
+
+
+Se puede apreciar la representación gráfica de la segmentación en el 3.Grafico Clustering Kmeans para 4 CLUSTERS del Modelo RFM.png
+
+```{r Bloque de Representación Gráfica Segmentación mediante Modelo RFM 4 clusters}
+
+
+png(paste("./3.Grafico Clustering Kmeans para ",NUM_CLUSTERS," CLUSTERS del Modelo RFM.png",sep=""),width = 1024, height = 880)
+par(mfrow=c(2, 2),oma = c(1, 0, 3, 0))
+plot(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA,col=Segmentos, xlab="FRECUENCIA", ylab="RECENCIA")
+plot(c(0,max(RFM_EGATUR$RECENCIA)),c(0,max(RFM_EGATUR$RECENCIA)), type="n", axes=F, xlab="", ylab="",xlim=c(0,max(RFM_EGATUR$RECENCIA)),ylim=c(0,max(RFM_EGATUR$RECENCIA)))
+legend(1,max(RFM_EGATUR$RECENCIA)/2-1,legend=c(1:NUM_CLUSTERS),yjust = 0.5,col=c(1:NUM_CLUSTERS),pch=15,cex=2)
+plot(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION,col=Segmentos, xlab="FRECUENCIA",ylab="MONETIZACION")
+plot(RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION,col=Segmentos, xlab="RECENCIA",ylab="MONETIZACION")
+mtext(paste("Clusterización kmeans de clientes mediante Modelo RFM 12 meses",sep=""), outer = TRUE, cex = 2)
+dev.off()
+
+```
+
