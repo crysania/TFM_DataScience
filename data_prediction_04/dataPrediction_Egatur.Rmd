@@ -25,7 +25,7 @@ rm(list=ls())
 
 setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
 
-library(plyr)
+
 library(dplyr)
 library(ggplot2)
 library(reshape2)
