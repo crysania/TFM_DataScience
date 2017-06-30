@@ -47,31 +47,31 @@ library(NbClust)
 
 En este script se desarrolla el procedimiento para obtener la respuesta a uno de los objetivos de este TFM:
 
- - Segmentación de los turistas según características similares.
+ - Segmentación de los turistas según características similares de gasto.
  
 
-Para ello se utilizará el modelo RFM (Recencia, Frecuencia y Valor Monetario), que consiste en agrupar los registros en distintos clústers o segmentos, de acuerdo a criterios demográficos, comportamentales, o de negocio.
+Para ello se utilizará el modelo RFM (Recencia, Frecuencia y Valor Monetario), que consiste en agrupar los registros en distintos clústers o segmentos, de acuerdo a criterios económicos, comportamentales, o de negocio.
 
 
 La idea es crear distintos segmentos en base a cada una de las 3 variables que hacen al modelo RFM, siguiendo el orden de sus siglas:
 
   - Recencia: Dias transcurridos entre la última visita y el final del periodo analizado.
   - Frecuencia: Número de visitas realizadas en dicho periodo.
-  - Monetización: Media de los gastos turísticos realizadas en este periodo.
+  - Monetización: Gastos turísticos realizadas en este periodo.
   
 
-El resultado de la triple segmentación dará un grupo ganador que es el que define cuáles son los mejores turistas, es decir, “los turistas más propensos a gastar son aquellos que nos han visitado más recientemente, con más frecuencia y gastan más dinero”.
+El resultado de la triple segmentación dará un grupo ganador que es el que definirá cuáles son los mejores turistas, es decir, “los turistas más propensos a gastar son aquellos que nos han visitado más recientemente, con más frecuencia y gastan más dinero”.
 
 
 Utilizar este modelo predictivo, consigue mejores resultados para las campañas de marketing por 2 motivos principales:
 
-  - Permite dirijirse a cada grupo de turistas con mensajes, frecuencia, y ofertas diferentes para optimizar los programas de comunicación para cada segmento y maximizar los resultados generales de las campañas.
+  - Permite dirigirse a cada grupo de turistas con mensajes y ofertas diferentes para optimizar los  programas de comunicación para cada segmento y maximizar los resultados económicos de las campañas.
 
-  - Conocimiento holístico del turista.
+  - Conocimiento holístico de los turistas.
   
 
 
-Se carga el fichero csv egaturRFM generado en la etapa anterior "Exploración de los datos".
+Se carga el fichero egaturRFM.csv generado en la etapa anterior "Exploración de los datos".
 
 
 
@@ -83,7 +83,12 @@ str(egaturRFM)
 
 ```
 
-Podemos apreciar que el dataset tiene 135149 registros con 4 variables de información del turista: el id del turista,el gasto total, el mes y el año del viaje.
+Se puede apreciar que el dataset tiene 135.149 registros con 4 variables de información del turista: 
+
+- id del turista.
+- gasto total.
+- mes del viaje.
+- año del viaje.
 
 
 Se analiza los primeros registros del dataset para tener una primera impresión del contenido.
@@ -103,7 +108,7 @@ tail(egaturRFM)
 
 ```
 
-Obtenemos los estadísticos de las variables para conocer de forma breve características básicas de los datos con los que estamos trabajando.
+Obtenemos los estadísticos de las variables para conocer de forma breve, características básicas de los datos con los que se está trabajando.
 
 ```{r  Bloque de estadísticos de las variables}
 
@@ -113,11 +118,11 @@ summary(egaturRFM)
 
 
 Se crea dos variables nuevas:
-  - Fecha con la unión del mes y año, como no está informado el día, se define para todas las fechas 01.
+
+  - Fecha con la unión del mes y año, como no está informado el día, se define para todas las fechas el día 01.
   - Frecuencia para el RFM, inicializada a 1.
 
 Se elimina las variables Mes y Anyo.
-
 
 
 ```{r Bloque de extracción y preparación de datos}
@@ -136,7 +141,7 @@ egaturRFM$Frecuencia <-1
 ```
 
 
-
+Se vuelve a cargar el contenido del dataset con las nuevas variables.
 
 ```{r Bloque de analisis de datos}
 
@@ -151,15 +156,14 @@ summary(egaturRFM)
 
 ## Construcción del modelo
 
-Construimos un modelo RFM para el año 2015, con las variables Recencia, Frecuencia y Monetización, que
-definiremos para cada cliente de la siguiente forma:
+Construimos un modelo RFM con las variables Recencia, Frecuencia y Monetización según los datos del dataset egaturRFM, la fecha seleccionada para aplicar el modelo es 2017-07-01.
 
 
 ```{r RFM}
-FECHA_1 = as.Date("2017-04-01")
+fechaRFM = as.Date("2017-07-01")
 
-RFM_EGATUR=summarise(group_by(egaturRFM[egaturRFM$Fecha<FECHA_1 & egaturRFM$Fecha>=FECHA_1-487,], Id),
-          RECENCIA = as.numeric(min(FECHA_1-Fecha, na.rm = TRUE)),
+RFM_EGATUR=summarise(group_by(egaturRFM, Id),
+          RECENCIA = as.numeric(min(fechaRFM-Fecha, na.rm = TRUE)),
           FRECUENCIA = sum(Frecuencia, na.rm = TRUE),
           MONETIZACION =  sum(Gasto_Total, na.rm = TRUE)
 )
@@ -167,9 +171,9 @@ RFM_EGATUR=summarise(group_by(egaturRFM[egaturRFM$Fecha<FECHA_1 & egaturRFM$Fech
 ```
 
 
-Se realizan varias gráficas para mostrar la densidad de los turistas a través del Modelo RFM.
+Se realizan las siguientes gráficas para mostrar la densidad de los turistas a través del Modelo RFM.
 
-1. Gráfico de Densidad Modelo RFM RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA
+1. Gráfico de Densidad Modelo RFM_EGATUR$FRECUENCIA - RFM_EGATUR$RECENCIA
 
 ```{r Bloque Gráfico de Densidad Modelo RFM RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA}
 
@@ -179,27 +183,28 @@ smoothScatter(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA, xlab="FRECUENCIA", ylab
 
 ```
 
-2. Gráfico de Densidad Modelo RFM FRECUENCIA,RFM_EGATUR$MONETIZACION
+2. Gráfico de Densidad Modelo RFM_EGATUR$FRECUENCIA - RFM_EGATUR$MONETIZACION
 
-```{r Bloque Gráfico de Densidad Modelo RFM FRECUENCIA,RFM_EGATUR$MONETIZACION}
+```{r Bloque Gráfico de Densidad Modelo RFM RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION}
 
 
-smoothScatter(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION, xlab="FRECUENCIA",ylab="MONETIZACION")
+smoothScatter(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION, xlab="FRECUENCIA", ylab="MONETIZACION")
+
 
 ```
 
-3. Gráfico de Densidad Modelo RFM RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION
+
+3. Gráfico de Densidad Modelo RFM_EGATUR$RECENCIA - RFM_EGATUR$MONETIZACION
 
 ```{r Bloque Gráfico de Densidad Modelo RFM RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION}
+
 
 smoothScatter(RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION, xlab="RECENCIA",ylab="MONETIZACION")
 
 
-
 ```
 
-
-Una forma más automatizada de implementación para el cálculo óptimo de clusters (eligiendo el número apropiado), es el método Elbow (método del codo), para este TFM el objetivo es clasificar en grupos a los turistas según el gasto realizado.
+Uno de los objetivos de este TFM, es clasificar en grupos a los turistas según el gasto realizado, para implementar el cálculo óptimo en la selección del número de Clusters, se ha utilizado el método Elbow (método del codo). 
 
 Este método utiliza los valores de la inercia obtenidos tras aplicar el K-means a diferente número de Clusters (desde 1 a N Clusters), siendo la inercia la suma de las distancias al cuadrado de cada objeto del Cluster a su centroide.
 
@@ -207,7 +212,9 @@ Una vez obtenidos los valores de la inercia tras aplicar el K-means de 1 a N Clu
 
 En esta gráfica se debería de apreciar un cambio brusco en la evolución de la inercia, teniendo la línea representada una forma similar a la de un brazo y su codo. 
 
-El punto en el que se observa ese cambio brusco en la inercia dirá el número óptimo de Clusters a seleccionar para ese dataset; o dicho de otra manera, el punto que representaría al codo del brazo será el número óptimo de Clusters para ese dataset.
+El punto en el que se observa ese cambio brusco en la inercia, dirá el número óptimo de Clusters a seleccionar para ese dataset, o dicho de otra manera, el punto que representaría al codo del brazo será el número óptimo de Clusters para ese dataset.
+
+
 
 
 
@@ -229,11 +236,14 @@ plot(1:10, wss, type = "b", pch = 19, frame = FALSE, xlab = "Numero de clusters"
 
 ```
 
-En este bloque se realiza la segmentación mediante la normalización de los datos y se calculan los segmentos en función al número de clusters óptimos seleccionados según el método Elbow del paso anterior.
 
-Se hace una comparativa entre 3 y 4 clusters.
+En este bloque se realiza el cálculo de los segmentos, en función al número de Clusters óptimos seleccionados según el método Elbow del paso anterior.
 
-Bloque de Segmentación mediante Modelo RFM para 3 Clusters.
+El modelo a aplicar es K-means, es un método de agrupamiento que tiene como objetivo la partición de un conjunto de n observaciones en k grupos, en el que cada observación pertenece al grupo cuyo valor medio es más cercano.
+
+En este TFM se va a realizar una comparativa entre 3 y 6 clusters.
+
+Bloque de Segmentación mediante Modelo RFM para 3 Clusters:
 
 
 ```{r Bloque de Segmentación mediante Modelo RFM para 3 clusters}
@@ -265,51 +275,27 @@ NORMALIZACION_SD=apply(RFM_EGATUR[,-1],MARGIN=2,FUN=sd)
 Modelo$centers[,1]*NORMALIZACION_SD[1]+NORMALIZACION_MEDIA[1]
 SEGMENTOS$RECENCIA
 
-
+SEGMENTOS
 
 
 ```
 
-Segmentos
-    1     2     3 
-51886 47228  6505 
 
 
-Centroides
-        1        2        3 
-371.4428 143.5544 168.3579 
- 
-
-K-means clustering with 3 clusters of sizes 51886, 47228, 6505
-
-Cluster means:
-    RECENCIA FRECUENCIA MONETIZACION
-1  0.8487294 -0.2247463  -0.12171064
-2 -0.8418309 -0.2260034  -0.08203525
-3 -0.6578294  3.4334934   1.56640110
-
-
-Within cluster sum of squares by cluster:
-[1] 35158.89 31488.27 77779.78
- (between_SS / total_SS =  54.4 %)
- 
- 
- 
-
-Se puede apreciar la representación gráfica de la segmentación en el 2.Grafico Clustering Kmeans para 3 CLUSTERS del Modelo RFM.png
+Se puede apreciar la representación gráfica de la segmentación en el fichero 1.Grafico_Clustering_Kmeans_3_CLUSTERS.png
 
 ```{r Bloque de Representación Gráfica Segmentación mediante Modelo RFM}
 
 
 
-png(paste("./2.Grafico Clustering Kmeans para ",NUM_CLUSTERS," CLUSTERS del Modelo RFM.png",sep=""),width = 1024, height = 880)
+png(paste("./1.Grafico_Clustering_Kmeans_",NUM_CLUSTERS,"_CLUSTERS.png",sep=""),width = 1024, height = 880)
 par(mfrow=c(2, 2),oma = c(1, 0, 3, 0))
 plot(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA,col=Segmentos, xlab="FRECUENCIA", ylab="RECENCIA")
 plot(c(0,max(RFM_EGATUR$RECENCIA)),c(0,max(RFM_EGATUR$RECENCIA)), type="n", axes=F, xlab="", ylab="",xlim=c(0,max(RFM_EGATUR$RECENCIA)),ylim=c(0,max(RFM_EGATUR$RECENCIA)))
 legend(1,max(RFM_EGATUR$RECENCIA)/2-1,legend=c(1:NUM_CLUSTERS),yjust = 0.5,col=c(1:NUM_CLUSTERS),pch=15,cex=2)
 plot(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION,col=Segmentos, xlab="FRECUENCIA",ylab="MONETIZACION")
 plot(RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION,col=Segmentos, xlab="RECENCIA",ylab="MONETIZACION")
-mtext(paste("Clusterización kmeans de clientes mediante Modelo RFM 12 meses",sep=""), outer = TRUE, cex = 2)
+mtext(paste("Clusterización kmeans de clientes mediante Modelo RFM",sep=""), outer = TRUE, cex = 2)
 dev.off()
 
 
@@ -317,14 +303,13 @@ dev.off()
 
 
  
- 
 
-Bloque de Segmentación mediante Modelo RFM para 4 Clusters.
+Bloque de Segmentación mediante Modelo RFM para 6 Clusters.
 
-```{r Bloque de Segmentación mediante Modelo RFM para 4 clusters}
+```{r Bloque de Segmentación mediante Modelo RFM para 6 clusters}
 
 
-NUM_CLUSTERS=4
+NUM_CLUSTERS=6
 set.seed(1234)
 
 Modelo=kmeans(RFM_EGATUR_NORM,NUM_CLUSTERS)
@@ -349,50 +334,34 @@ NORMALIZACION_SD=apply(RFM_EGATUR[,-1],MARGIN=2,FUN=sd)
 ## Comprobación de los centroides construidos
 Modelo$centers[,1]*NORMALIZACION_SD[1]+NORMALIZACION_MEDIA[1]
 SEGMENTOS$RECENCIA
-
-
-
+SEGMENTOS
 ```
 
-Segmentos
-    1     2     3     4 
-33196 30502 35494  6427 
 
 
-Centroides
-
-       1        2        3        4 
-411.8923 101.2221 262.4311 166.8360 
-
-K-means clustering with 4 clusters of sizes 33196, 30502, 35494, 6427
-
-Cluster means:
-     RECENCIA FRECUENCIA MONETIZACION
-1  1.14879851 -0.2238676   -0.2512577
-2 -1.15586748 -0.2260034   -0.1664799
-3  0.04004011 -0.2260034    0.1027447
-4 -0.66911923  3.4770236    1.5204450
-
-Within cluster sum of squares by cluster:
-[1] 11485.21 12278.13 29276.88 75409.35
- (between_SS / total_SS =  59.5 %)
-
-
-
-Se puede apreciar la representación gráfica de la segmentación en el 3.Grafico Clustering Kmeans para 4 CLUSTERS del Modelo RFM.png
+Se puede apreciar la representación gráfica de la segmentación en el fichero 2.Grafico_Clustering_Kmeans_6_CLUSTERS.png
 
 ```{r Bloque de Representación Gráfica Segmentación mediante Modelo RFM 4 clusters}
 
 
-png(paste("./3.Grafico Clustering Kmeans para ",NUM_CLUSTERS," CLUSTERS del Modelo RFM.png",sep=""),width = 1024, height = 880)
+png(paste("./2.Grafico_Clustering_Kmeans_",NUM_CLUSTERS,"_CLUSTERS.png",sep=""),width = 1024, height = 880)
 par(mfrow=c(2, 2),oma = c(1, 0, 3, 0))
 plot(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$RECENCIA,col=Segmentos, xlab="FRECUENCIA", ylab="RECENCIA")
 plot(c(0,max(RFM_EGATUR$RECENCIA)),c(0,max(RFM_EGATUR$RECENCIA)), type="n", axes=F, xlab="", ylab="",xlim=c(0,max(RFM_EGATUR$RECENCIA)),ylim=c(0,max(RFM_EGATUR$RECENCIA)))
 legend(1,max(RFM_EGATUR$RECENCIA)/2-1,legend=c(1:NUM_CLUSTERS),yjust = 0.5,col=c(1:NUM_CLUSTERS),pch=15,cex=2)
 plot(RFM_EGATUR$FRECUENCIA,RFM_EGATUR$MONETIZACION,col=Segmentos, xlab="FRECUENCIA",ylab="MONETIZACION")
 plot(RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION,col=Segmentos, xlab="RECENCIA",ylab="MONETIZACION")
-mtext(paste("Clusterización kmeans de clientes mediante Modelo RFM 12 meses",sep=""), outer = TRUE, cex = 2)
+mtext(paste("Clusterización kmeans de clientes mediante Modelo RFM",sep=""), outer = TRUE, cex = 2)
 dev.off()
 
 ```
 
+Se añade una variable al dataset RFM_EGATUR con el número de Cluster de cada instancia, con el fin de generar un fichero "RFM_EGATUR_CLUSTERS_6.csv" y visualizar los datos en Tableau.
+
+
+```{r Bloque preparar datos para visualizacion Tableau}
+
+RFM_EGATUR$Cluster = Modelo$cluster
+
+write.csv(RFM_EGATUR, file = "RFM_EGATUR_CLUSTERS_6.csv", row.names=FALSE)
+```
