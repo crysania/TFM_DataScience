@@ -25,20 +25,12 @@ rm(list=ls())
 
 setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
 
-
 library(dplyr)
 library(ggplot2)
-library(reshape2)
 library(data.table)
-library(effects)
-library(ROCR)
-library(stats)
 library(scales)
-library(factoextra)
 library(cluster)
 library(NbClust)
-
-
 
 ```
 
@@ -77,8 +69,8 @@ Se carga el fichero egaturRFM.csv generado en la etapa anterior "Exploración de
 
 ```{r  Bloque de carga de datos egaturRFM.csv}
 
-egaturRFM <- read.table("../data_exploring_03/egaturRFM.csv", header = T, sep = ",",   fileEncoding="utf-8")
-str(egaturRFM)
+egaturDS <- read.table("../data_exploring_03/egaturRFM.csv", header = T, sep = ",",   fileEncoding="utf-8")
+str(egaturDS)
 
 
 ```
@@ -86,6 +78,8 @@ str(egaturRFM)
 Se puede apreciar que el dataset tiene 135.149 registros con 4 variables de información del turista: 
 
 - id del turista.
+- pais del turista.
+- destino del turista.
 - gasto total.
 - mes del viaje.
 - año del viaje.
@@ -95,7 +89,7 @@ Se analiza los primeros registros del dataset para tener una primera impresión 
 
 ```{r  Bloque de analisis del dataset}
 
-head(egaturRFM)
+head(egaturDS)
 
 ```
 
@@ -104,7 +98,7 @@ Y los últimos para detectar problemas en la carga de los datos, incongruencias 
 
 ```{r  Bloque de analisis del dataset final}
 
-tail(egaturRFM)
+tail(egaturDS)
 
 ```
 
@@ -112,7 +106,7 @@ Obtenemos los estadísticos de las variables para conocer de forma breve, caract
 
 ```{r  Bloque de estadísticos de las variables}
 
-summary(egaturRFM)
+summary(egaturDS)
 
 ```
 
@@ -127,23 +121,31 @@ Se elimina las variables Mes y Anyo.
 
 ```{r Bloque de extracción y preparación de datos}
 
-egaturRFM$Gasto_Total<-as.numeric(egaturRFM$Gasto_Total)
+egaturDS$Gasto_Total<-as.numeric(egaturDS$Gasto_Total)
 
-egaturRFM$Fecha <- as.Date(paste("01", as.numeric(egaturRFM$Mes), as.numeric(egaturRFM$Anyo), sep="-"),
+egaturDS$Pais<-as.factor(egaturDS$Pais)
+egaturDS$Destino_CCAA<-as.factor(egaturDS$Destino_CCAA)
+
+egaturDS$Fecha <- as.Date(paste("01", as.numeric(egaturDS$Mes), as.numeric(egaturDS$Anyo), sep="-"),
                       format = "%d-%m-%Y")
 
 
-egaturRFM$Mes <- NULL
-egaturRFM$Anyo <- NULL
+egaturDS$Mes <- NULL
+egaturDS$Anyo <- NULL
 
-egaturRFM$Frecuencia <-1
 
 ```
 
 
-Se vuelve a cargar el contenido del dataset con las nuevas variables.
+
+Se crea un nuevo dataset egaturRFM con las variables necesarias para el Modelo RFM.
 
 ```{r Bloque de analisis de datos}
+
+egaturRFM <- egaturDS[c(1,4,5)]
+
+egaturRFM$Gasto_Total<-as.numeric(egaturRFM$Gasto_Total)
+egaturRFM$Frecuencia <-1
 
 str(egaturRFM)
 
@@ -154,7 +156,7 @@ summary(egaturRFM)
 
 
 
-## Construcción del modelo
+# Construcción del modelo
 
 Construimos un modelo RFM con las variables Recencia, Frecuencia y Monetización según los datos del dataset egaturRFM, la fecha seleccionada para aplicar el modelo es 2017-07-01.
 
@@ -170,6 +172,8 @@ RFM_EGATUR=summarise(group_by(egaturRFM, Id),
 
 ```
 
+
+# Realización de gráficas para visualizar la densidad de los turistas
 
 Se realizan las siguientes gráficas para mostrar la densidad de los turistas a través del Modelo RFM.
 
@@ -204,6 +208,8 @@ smoothScatter(RFM_EGATUR$RECENCIA,RFM_EGATUR$MONETIZACION, xlab="RECENCIA",ylab=
 
 ```
 
+# Método Elbow
+
 Uno de los objetivos de este TFM, es clasificar en grupos a los turistas según el gasto realizado, para implementar el cálculo óptimo en la selección del número de Clusters, se ha utilizado el método Elbow (método del codo). 
 
 Este método utiliza los valores de la inercia obtenidos tras aplicar el K-means a diferente número de Clusters (desde 1 a N Clusters), siendo la inercia la suma de las distancias al cuadrado de cada objeto del Cluster a su centroide.
@@ -236,6 +242,7 @@ plot(1:10, wss, type = "b", pch = 19, frame = FALSE, xlab = "Numero de clusters"
 
 ```
 
+# Clusters
 
 En este bloque se realiza el cálculo de los segmentos, en función al número de Clusters óptimos seleccionados según el método Elbow del paso anterior.
 
@@ -279,7 +286,6 @@ SEGMENTOS
 
 
 ```
-
 
 
 Se puede apreciar la representación gráfica de la segmentación en el fichero 1.Grafico_Clustering_Kmeans_3_CLUSTERS.png
@@ -341,7 +347,7 @@ SEGMENTOS
 
 Se puede apreciar la representación gráfica de la segmentación en el fichero 2.Grafico_Clustering_Kmeans_6_CLUSTERS.png
 
-```{r Bloque de Representación Gráfica Segmentación mediante Modelo RFM 4 clusters}
+```{r Bloque de Representación Gráfica Segmentación mediante Modelo RFM 6 clusters}
 
 
 png(paste("./2.Grafico_Clustering_Kmeans_",NUM_CLUSTERS,"_CLUSTERS.png",sep=""),width = 1024, height = 880)
@@ -356,12 +362,65 @@ dev.off()
 
 ```
 
-Se añade una variable al dataset RFM_EGATUR con el número de Cluster de cada instancia, con el fin de generar un fichero "RFM_EGATUR_CLUSTERS_6.csv" y visualizar los datos en Tableau.
+# Conclusiones
+
+
+El objetivo es hacer una segmentación de los turistas según características de gasto similares, para poder definir acciones de marketing específicas para cada tipo de turista, acciones publicitarias, así como lanzamiento de promociones especiales dirigidas a un turista objetivo.
+
+La idea es crear distintos segmentos en base a cada una de las 3 variables que hacen al modelo RFM, siguiendo el orden de sus siglas:
+
+Recencia: Dias transcurridos entre la última visita y el final del periodo analizado (01-07-2017)
+Frecuencia: Número de visitas realizadas en dicho periodo.
+Monetización: suma de los gastos turísticos realizadas en este periodo.
+
+Existen difencias entre los grupos obtenidos según el número de Clusters, si se quiere realizar un análisis más detallado de cada perfil de turistas se necesita un mayor grado de clusterización.
+
+Por ello se han definido dos estudios en este TFM, 3 y 6 Clusters, seleccionados en los bloques anteriores:
+
+## 3 Clusters
+
+Existe el grupo 3 definido como los "turistas vips", son aquellos que han realizan un gasto alto en España, que han visitado España recientemente y con mayor frecuencia.
+
+Los grupos 1 y 2 son los más numerosos, tienen características similares en cuanto al gasto realizado y la frecuencia, pero por el contrario el grupo 1 lleva mas tiempo sin visitar España.
+
+
+## 6 Clusters
+
+Del resultado de la segmentación en los 6 clusters, se observa dos grupos (4 y 6) definidos como mejores turistas, es decir, “los turistas más propensos a gastar son aquellos que nos han visitado más recientemente, con más frecuencia y gastan más dinero”, es decir, recencia baja, frecuencia alta y monetización alta, pero por el contrario son los menos numerosos.
+
+En cambio, el grupo 1 es objetivo de campañas de marketing, promociones u ofertas puesto que el gasto es muy bajo, la frecuencia también y ha pasado bastante tiempo sin visitar España.
+
+
+
+# Visualización de los datos
+
+En este apartado se procede a analizar los datos generados en un dashboard interactivo, para ello se va a crear un fichero csv con los datos calculados en el modelo, el cluster al que pertenece el turista y el país de procedencia.
+
+Se añade una variable al dataset RFM_EGATUR, con el número de Cluster de cada instancia, el país de origen y el destino CCAA, con el fin de generar un fichero "RFM_EGATUR_CLUSTERS_6.csv" y visualizar los datos en Tableau.
 
 
 ```{r Bloque preparar datos para visualizacion Tableau}
 
-RFM_EGATUR$Cluster = Modelo$cluster
+df_Paises <- read.table("../data_cleaning_02/PaisesE.csv", header = T, sep = ";",   fileEncoding="utf-8")
+df_Paises
+df_Paises$Pais<-as.factor(df_Paises$Pais)
 
-write.csv(RFM_EGATUR, file = "RFM_EGATUR_CLUSTERS_6.csv", row.names=FALSE)
+df_CCAA <- read.table("../data_cleaning_02/CCAAE.csv", header = T, sep = ";",  fileEncoding="utf-8")
+df_CCAA
+df_CCAA$Codigo<-as.factor(df_CCAA$Codigo)
+colnames(df_CCAA)[colnames(df_CCAA)=="Codigo"] <- "Destino_CCAA"
+
+dfmerge_Pais <- inner_join(egaturDS,df_Paises)
+dfmerge_CCCAA <- inner_join(dfmerge_Pais,df_CCAA)
+
+egaturRFM_Aux <- dfmerge_CCCAA[c(1,6,7)]
+
+RFM_EGATUR$CLUSTER <- Modelo$cluster
+
+dfmergeFinal <- inner_join(RFM_EGATUR,egaturRFM_Aux)
+
+colnames(dfmergeFinal)[colnames(dfmergeFinal)=="Nombre"] <- "PAIS"
+
+write.csv(dfmergeFinal, file = "RFM_EGATUR_CLUSTERS_6.csv", row.names=FALSE)
+
 ```
