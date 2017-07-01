@@ -215,7 +215,7 @@ head(dsEgatur)
 
 ```{r Bloque creacion del dataset para modelo RFM de prediccion}
 
-egaturRFM <- dsEgatur[c(1,10,12,13)]
+egaturRFM <- dsEgatur[c(1,4,5,10,12,13)]
 
 head(egaturRFM)
 

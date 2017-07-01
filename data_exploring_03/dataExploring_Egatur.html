@@ -438,16 +438,16 @@ head(dsEgatur)</code></pre>
 ## 4  147061.19           1143.7343
 ## 5   94504.58            655.0295
 ## 6  121706.27            911.6390</code></pre>
-<pre class="r"><code>egaturRFM &lt;- dsEgatur[c(1,10,12,13)]
+<pre class="r"><code>egaturRFM &lt;- dsEgatur[c(1,4,5,10,12,13)]
 
 head(egaturRFM)</code></pre>
-<pre><code>##               Id Gasto_Total Mes Anyo
-## 1 0115EVA0000106    1464.609   1 2017
-## 2 0115EVA0000142    1690.454   1 2017
-## 3 0115EVA0000872    1890.817   1 2017
-## 4 0115EVA0001326    1671.538   1 2017
-## 5 0115EVA0001394    1009.927   1 2017
-## 6 0115EVA0001395    1602.032   1 2017</code></pre>
+<pre><code>##               Id Pais Destino_CCAA Gasto_Total Mes Anyo
+## 1 0115EVA0000106   14           13    1464.609   1 2017
+## 2 0115EVA0000142   14           13    1690.454   1 2017
+## 3 0115EVA0000872   14           13    1890.817   1 2017
+## 4 0115EVA0001326   14            9    1671.538   1 2017
+## 5 0115EVA0001394    4            1    1009.927   1 2017
+## 6 0115EVA0001395    4            1    1602.032   1 2017</code></pre>
 <p>Los turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017 se gastan 111.760.512.068 euros.</p>
 <pre class="r"><code>totalG = summarize(dsEgatur, totalG = sum(dsEgatur$Gasto_Real, na.rm = T))
 totalG</code></pre>
