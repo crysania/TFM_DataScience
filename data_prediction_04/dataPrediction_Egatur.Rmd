@@ -411,6 +411,7 @@ df_CCAA$Codigo<-as.factor(df_CCAA$Codigo)
 colnames(df_CCAA)[colnames(df_CCAA)=="Codigo"] <- "Destino_CCAA"
 
 #sustituimos para la visualizacion correcta en Tableau el nombre de las CCAA
+
 df_CCAA$CCAA <- gsub("Com.Madrid ",  "Madrid", df_CCAA$CCAA)
 df_CCAA$CCAA <- gsub("Com.Valenciana ",  "Valencia", df_CCAA$CCAA)
 df_CCAA$CCAA <- gsub("C.F.Navarra ",  "Navarra", df_CCAA$CCAA)
