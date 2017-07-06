@@ -373,7 +373,7 @@ Recencia: Dias transcurridos entre la última visita y el final del periodo anal
 Frecuencia: Número de visitas realizadas en dicho periodo.
 Monetización: suma de los gastos turísticos realizadas en este periodo.
 
-Existen difencias entre los grupos obtenidos según el número de Clusters, si se quiere realizar un análisis más detallado de cada perfil de turistas se necesita un mayor grado de clusterización.
+Existen diferencias entre los grupos obtenidos según el número de Clusters, si se quiere realizar un análisis más detallado de cada perfil de turistas se necesita un mayor grado de clusterización.
 
 Por ello se han definido dos estudios en este TFM, 3 y 6 Clusters, seleccionados en los bloques anteriores:
 
@@ -409,6 +409,12 @@ df_CCAA <- read.table("../data_cleaning_02/CCAAE.csv", header = T, sep = ";",  f
 df_CCAA
 df_CCAA$Codigo<-as.factor(df_CCAA$Codigo)
 colnames(df_CCAA)[colnames(df_CCAA)=="Codigo"] <- "Destino_CCAA"
+
+#sustituimos para la visualizacion correcta en Tableau el nombre de las CCAA
+df_CCAA$CCAA <- gsub("Com.Madrid ",  "Madrid", df_CCAA$CCAA)
+df_CCAA$CCAA <- gsub("Com.Valenciana ",  "Valencia", df_CCAA$CCAA)
+df_CCAA$CCAA <- gsub("C.F.Navarra ",  "Navarra", df_CCAA$CCAA)
+
 
 dfmerge_Pais <- inner_join(egaturDS,df_Paises)
 dfmerge_CCCAA <- inner_join(dfmerge_Pais,df_CCAA)
