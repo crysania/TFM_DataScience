@@ -60,9 +60,9 @@ En el fichero Frontur.csv, cada registro representa a un viajero que finaliza su
 
 La variable que identifica de manera única cada registro es Id. Sumando el factor de elevación de cada registro ('Factor') se obtiene la estimación del número de viajeros, que podrá desglosarse en función del resto de variables de clasificación del fichero: turistas-excursionistas, destino principal, país de residencia, vía de acceso y tipo de alojamiento.
 
-El fichero Paises.csv se relacionan los códigos de cada país, con el nombre del País de resisdencia habitual del turista.
+El fichero Paises.csv se relacionan los códigos de cada país, con el nombre del País de residencia habitual del turista.
 
-El fichero CCAA.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principial del viaje.
+El fichero CCAA.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principal del viaje.
 
 
 ```{r  Bloque de carga de datos Frontur.csv, Paises.csv y CCAA.csv}
@@ -173,12 +173,7 @@ sapply(df_Frontur,function(x) sum(is.na(x)))
 
 ```
 
-```{r Bloque nan}
 
-
-sapply(df_Frontur,function(x) sum(is.nan(x)))
-
-```
 
 
 # Análisis descriptivo de los datos
@@ -192,7 +187,7 @@ summary(df_Frontur)
 
 
 
-Total de turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017, son 169.385.169 y de media 170.3478
+Total de turistas que vienen a España durante el periodo Octubre 2015 a Abril 2017, son 169.385.169 y de media 170.3478
 
 ```{r Bloque total turistas}
 
@@ -283,18 +278,7 @@ ggplot(data=df_mergeCCAA, aes(y=pct, x=CCAA)) +
  
 ```   
 
-Se utiliza un ggplot para representar la relación entre Viajeros, Destino_CCAA y año.
 
-
-
-```{r Bloque para representar ggplot}
-
-
-  ggplot(df_Frontur, aes(x = Destino_CCAA, y = Viajeros, col=df_Frontur$Anyo)) +
-    geom_point() + geom_smooth() 
-
-
-```
 
 El mes con mayor número de turistas que visitaron España fue Agosto del 2016.
 
@@ -329,6 +313,16 @@ head(Ft_dt3,20)
 
 ```
 
+Se utiliza un ggplot para representar la relación entre Viajeros, Destino_CCAA y año.
+
+```{r Bloque para representar ggplot}
+
+
+  ggplot(Ft_dt3, aes(x = Destino_CCAA, y = Viajeros, col=Anyo)) +
+    geom_point() + geom_smooth() 
+
+
+```
 
 
 Por el contrario en Abril del 2017, fue el periodo menos visitado eligiendo Ceuta como destino.
@@ -352,6 +346,15 @@ head(Ft_dt4,20)
 
 ```
 
+
+```{r Bloque para representar ggplot Viajeros, anyo y pais}
+
+
+  ggplot(Ft_dt4, aes(x = Pais, y = Viajeros, col=Anyo)) +
+    geom_point() + geom_smooth() 
+
+
+```
 
 En Octubre del 2015 se ha dectectado el número más bajo de visitantes, siendo Rusia el país de origen de los turistas.
 

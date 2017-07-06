@@ -152,8 +152,8 @@ $(document).ready(function () {
 <p>El gasto medio por persona, se obtendrá como el cociente del gasto turístico entre los turistas, calculados sumando la variable ‘Factor_Egatur’.</p>
 <p>La estimación de las pernoctaciones, resultante de multiplicar la variable ‘A13’ por ‘Factor_Egatur’, se utiliza como denominador del gasto medio diario, siendo el numerador el gasto turístico.</p>
 <p>Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas.</p>
-<p>El fichero PaisesE.csv se relacionan los códigos de cada país, con el nombre del País de resisdencia habitual del turista.</p>
-<p>El fichero CCAAE.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principial del viaje.</p>
+<p>El fichero PaisesE.csv se relacionan los códigos de cada país, con el nombre del País de residencia habitual del turista.</p>
+<p>El fichero CCAAE.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principal del viaje.</p>
 <pre class="r"><code>dsEgatur &lt;- read.table(&quot;../data_cleaning_02/Egatur.csv&quot;, header = T, sep = &quot;,&quot; , fileEncoding =&quot;utf-8&quot;)
 
 head(dsEgatur)</code></pre>
@@ -448,7 +448,7 @@ head(egaturRFM)</code></pre>
 ## 4 0115EVA0001326   14            9    1671.538   1 2017
 ## 5 0115EVA0001394    4            1    1009.927   1 2017
 ## 6 0115EVA0001395    4            1    1602.032   1 2017</code></pre>
-<p>Los turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017 se gastan 111.760.512.068 euros.</p>
+<p>Los turistas que vienen a España durante el periodo Octubre 2015 a Abril 2017 se gastan 111.760.512.068 euros.</p>
 <pre class="r"><code>totalG = summarize(dsEgatur, totalG = sum(dsEgatur$Gasto_Real, na.rm = T))
 totalG</code></pre>
 <pre><code>##         totalG
@@ -650,7 +650,7 @@ head(Ft_dt4,10)</code></pre>
 ## 8  2016   8    3 1414642821
 ## 9  2015  10    8 1336413822
 ## 10 2016   7    1 1309078887</code></pre>
-<p>En Abril del 2016 se ha dectectado que el gasto más bajo lo realizaron los portugueses –&gt; 48.219.280 euros</p>
+<p>En Abril del 2016 se ha detectado que el gasto más bajo lo realizaron los portugueses –&gt; 48.219.280 euros</p>
 <pre class="r"><code>tail(Ft_dt4,10)</code></pre>
 <pre><code>##     Anyo Mes Pais Gasto_Real
 ## 276 2016   4    7   48219280

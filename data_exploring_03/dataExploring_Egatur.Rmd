@@ -67,9 +67,9 @@ La estimación de las pernoctaciones, resultante de multiplicar la variable ‘A
 
 Además se utiliza en la estimación de la duración media del viaje, dividiendo los turistas entre las pernoctaciones estimadas.
 
-El fichero PaisesE.csv se relacionan los códigos de cada país, con el nombre del País de resisdencia habitual del turista.
+El fichero PaisesE.csv se relacionan los códigos de cada país, con el nombre del País de residencia habitual del turista.
 
-El fichero CCAAE.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principial del viaje.
+El fichero CCAAE.csv contiene los códigos de las CCAA y su nombre correspondiente como destino principal del viaje.
 
 
 ```{r  Bloque de carga de datos Egatur.csv, Paises.csv y CCAA.csv}
@@ -221,7 +221,7 @@ head(egaturRFM)
 
 ```
 
-Los turistas que vienen a España durante el periodo Abril 2016 a Marzo 2017 se gastan 111.760.512.068 euros.
+Los turistas que vienen a España durante el periodo Octubre 2015 a Abril 2017 se gastan 111.760.512.068 euros.
 
 ```{r Bloque total Gasto}
 
@@ -418,7 +418,7 @@ head(Ft_dt4,10)
 
 ```
 
-En Abril del 2016 se ha dectectado que el gasto más bajo lo realizaron los portugueses --> 48.219.280 euros
+En Abril del 2016 se ha detectado que el gasto más bajo lo realizaron los portugueses --> 48.219.280 euros
 
 
 ```{r menos gasto pais}
