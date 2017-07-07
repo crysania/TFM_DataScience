@@ -364,3 +364,23 @@ En Octubre del 2015 se ha dectectado el número más bajo de visitantes, siendo 
 tail(Ft_dt4,20)
 
 ```
+
+
+
+
+
+Se generan varios ficheros para poder utilizarlos en las siguientes etapas (prediction & visualization) con los datos del dataset.
+
+
+```{r file csv}
+
+
+write.csv(df_Frontur,file="fronturGLM.csv",row.names = FALSE )
+
+write.csv(Ft_dt4,file="viajeros_fec_pais.csv",row.names = FALSE )
+write.csv(Ft_dt3,file="viajeros_fec_ccaa.csv",row.names = FALSE )
+
+write.csv(df_Frontur,file="dsFrontur_Final.csv",row.names = FALSE )
+
+
+```

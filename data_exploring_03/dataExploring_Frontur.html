@@ -630,6 +630,13 @@ head(Ft_dt4,20)</code></pre>
 ## 283   16  11   11 44341.79
 ## 284   15  12   11 42608.37
 ## 285   16   2   11 40270.79</code></pre>
+<p>Se generan varios ficheros para poder utilizarlos en las siguientes etapas (prediction &amp; visualization) con los datos del dataset.</p>
+<pre class="r"><code>write.csv(df_Frontur,file=&quot;fronturGLM.csv&quot;,row.names = FALSE )
+
+write.csv(Ft_dt4,file=&quot;viajeros_fec_pais.csv&quot;,row.names = FALSE )
+write.csv(Ft_dt3,file=&quot;viajeros_fec_ccaa.csv&quot;,row.names = FALSE )
+
+write.csv(df_Frontur,file=&quot;dsFrontur_Final.csv&quot;,row.names = FALSE )</code></pre>
 </div>
 
 
