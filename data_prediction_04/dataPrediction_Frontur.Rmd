@@ -1,5 +1,5 @@
 ---
-title: "Predicción de los datos en Frontur.csv"
+title: "Predicción de los datos en Frontur"
 author: "Sandra de la Fuente"
 date: "30 de mayo de 2017"
 output:
@@ -17,17 +17,7 @@ output:
 <br></br>
 
 
-# Se establece el directorio de trabajo y las librerías necesarias
 
-library(plyr)<br>
-library(dplyr)<br>
-library(ggplot2)<br>
-library(reshape2)<br>
-library(data.table)<br>
-library(effects)<br>
-library(ROCR)<br>
-library(stats)<br>
-library(randomForest)<br>
 
 ```{r setwd y librerias, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -36,6 +26,7 @@ rm(list=ls())
 
 setwd("C:/Users/sandr/Desktop/TFM_Master/TFM_DataScience/")
 
+library(forecast)
 library(plyr)
 library(dplyr)
 library(ggplot2)
@@ -44,211 +35,189 @@ library(data.table)
 library(effects)
 library(ROCR)
 library(stats)
-library(randomForest)
-
+library(xts)
 
 
 ```
+
+
+En este script se desarrolla el procedimiento para obtener la respuesta a uno de los objetivos de este TFM:
+
+ -  Análisis predictivo de la actividad turística en España.
 
 
 # Predicción de los datos
 
-##Aprendizaje automático
 
-Los algoritmos de aprendizaje automático emplean métodos de cálculo para "aprender" información directamente a partir de los datos sin asumir una ecuación predeterminada como modelo.
+Para ello se van a utilizar las técnicas de Análisis de Series Temporales:
 
-##Regresión
-
-Mediante las técnicas de regresión, se puede modelizar una variable de respuesta continua como una función de uno o más predictores.
-
-Existen diversos algoritmos de regresión, tales como regresión lineal, modelos lineales generalizados, regresión no lineal y modelos de efectos mixtos.
-  
-<b>Regresión lineal</b>
-
-La regresión lineal es una técnica de modelización estadística que se emplea para describir una variable de respuesta continua a modo de función de una o varias variables predictivas. Puede ayudar a comprender y predecir el comportamiento de sistemas complejos o a analizar datos experimentales, financieros y biológicos. 
-
-Existen varios tipos de modelos de regresión y métodos de ajuste lineales, entre los que se encuentran:
-
-- Simple: modelo con un único predictor.
-- Múltiple: modelo con varios predictores.
-- Multivariante: modelo con varias variables de respuesta.
-- Robusta: modelo con valores atípicos.
-- Por pasos sucesivos: modelo con selección automática de variables.
-- Regularizada: modelo que admite predictores redundantes y evita el sobreajuste mediante algoritmos ridge, lasso y elastic net.
+-	Gráficos temporales. 
+-	Series estacionarias y no estacionarias. 
+-	Descomposición de una serie: tendencia, estacionalidad y componente irregular. 
+-	Predicción.
 
 
-<b>Regresión no lineal</b>
-
-La regresión no lineal es una técnica de modelización estadística que ayuda a describir relaciones no lineales en datos experimentales. Se suele considerar que los modelos de regresión no lineal son paramétricos, es decir, que el modelo se describe en forma de ecuación no lineal.
-
-
-<b>Modelos lineales generalizados</b>
-
-Los modelos lineales generalizados son un caso especial de modelos no lineales que emplean métodos lineales. Permiten que las variables de respuesta tengan distribuciones no normales y una función de vínculo que describe cómo se relaciona el valor esperado de la respuesta con los predictores lineales. 
-
-Existen varios tipos de modelos lineales generalizados con las siguientes distribuciones de respuesta:
-
-- Normal
-- Binomial (regresión probit o logística)
-- Poisson
-- Gamma
-- Gaussiana inversa
-
-<b>Modelos de efectos mixtos</b>
-
-Los modelos de efectos mixtos lineales y no lineales son generalizaciones de modelos lineales y no lineales para datos recopilados y agrupados. Estos modelos describen la relación entre una variable de respuesta y las variables independientes, con coeficientes que pueden variar con respecto a una o varias variables de agrupación.
-
-
-##Evaluación de modelos
-
-Se evaluan los modelos para algoritmos de regresión mediante tests de significancia estadística y medidas de bondad de ajuste, tales como:
-
-<b>Estadístico F y estadístico T</b>
-<b>R2 y R2 ajustada</b>
-<b>Error cuadrático medio con validación cruzada</b>
-<b>Criterio de la información de Akaike (AIC) y criterio de la información bayesiano (BIC)</b>
-
-Es posible calcular los intervalos de confianza tanto para coeficientes de regresión como para valores predichos.
-
-##Evaluación de la bondad del ajuste
-
-Se realiza para evaluar hasta qué punto se ajusta un conjunto de datos a una determinada distribución.
-
-Es posible generar gráficos de probabilidad a partir de conjuntos de datos completos y de conjuntos de datos censurados. Asimismo, puede utilizar gráficos Q-Q para evaluar qué tal se ajusta una distribución dada a una distribución normal estándar.
-
-Existen los tests de hipótesis para determinar si un conjunto de datos es coherente con distintas distribuciones de probabilidad. Entre los tests de distribución específicos se incluyen:
-
-<b>Tests de Anderson-Darling</b>
-<b>Tests de Kolmogorov-Smirnov de una cola y de dos colas</b>
-<b>Tests de bondad del ajuste chi-square </b>
-<b>Tests de Lilliefors</b>
-<b>Tests de Ansari-Bradley</b>
-<b>Tests de Jarque-Bera</b>
-<b>Tests de Durbin-Watson</b>
-
-```{r echo=FALSE, results="hide",warning=FALSE,message=FALSE}
-# Establecemos una semilla
-set.seed(1234)
-
-```
+Se carga el fichero fronturGLM.csv generado en la etapa anterior "Exploración de los datos".
 
 
 ```{r  Bloque de carga de datos Frontur.csv, Paises.csv y CCAA.csv}
 
-df_Frontur <- read.table("../data_cleaning_02/Frontur.csv", header = T, sep = "," , fileEncoding = "latin1")
-head(df_Frontur)
+fronturDS <- read.table("../data_exploring_03/fronturGLM.csv", header = T, sep = "," , fileEncoding = "utf-8")
+head(fronturDS)
 
-df_Paises <- read.table("../data_cleaning_02/Paises.csv", header = T, sep = ";",   fileEncoding="utf-8")
-df_Paises
-
-df_CCAA <- read.table("../data_cleaning_02/CCAA.csv", header = T, sep = ";",  fileEncoding="utf-8")
-df_CCAA
 
 ```
+
+Se realiza una revisión básica del dataset y los estadísticos de las variables para conocer de forma breve, características básicas de los datos con los que se está trabajando.
+
+```{r data analysis}
+
+str(fronturDS)
+summary(fronturDS)
+
+
+```
+
+Se puede apreciar que el dataset tiene 994.349 registros con 12 variables de información del turista: 
+
+- id del turista.
+- tipo del turista.
+- via de entrada del turista.
+- pais del turista.
+- destino del turista.
+- alojamiento durante el viaje.
+- motivo del viaje.
+- paquete turistico contratado.
+- número de pernoctaciones.
+- viajeros
+- mes del viaje.
+- año del viaje.
+
+
+
 # Formateo de los datos
 
 Se formatea los datos a los tipos adecuados:
   1. Tipos numéricos (Viajeros)
   2. Tipos Categóricos (Tipo_Viajero, Via_Entrada, Pais, Destino_CCAA, Alojamiento, Motivo, Paquete_Turistico , Pernoctaciones y Mes)
 
+Se crea una variables nueva con la fecha resultado de la unión del mes y año, como no está informado el día, se define para todas las fechas el día 01.
 
 ```{r data format}
 
-df_Frontur$Viajeros<-as.double(df_Frontur$Viajeros)
+fronturDS$Viajeros<-as.numeric(fronturDS$Viajeros)
 
-df_Frontur$Tipo_Viajero<-as.factor(df_Frontur$Tipo_Viajero)
-df_Frontur$Via_Entrada<-as.factor(df_Frontur$Via_Entrada)
-df_Frontur$Pais<-as.factor(df_Frontur$Pais)
-df_Frontur$Destino_CCAA<-as.factor(df_Frontur$Destino_CCAA)
-df_Frontur$Alojamiento<-as.factor(df_Frontur$Alojamiento)
-df_Frontur$Motivo<-as.factor(df_Frontur$Motivo)
-df_Frontur$Pernoctaciones<-as.factor(df_Frontur$Pernoctaciones)
-df_Frontur$Mes<-as.factor(df_Frontur$Mes)
-df_Frontur$Anyo<-as.factor(df_Frontur$Anyo)
-df_Frontur$Paquete_Turistico<-as.factor(df_Frontur$Paquete_Turistico)
+fronturDS$Tipo_Viajero<-as.factor(fronturDS$Tipo_Viajero)
+fronturDS$Via_Entrada<-as.factor(fronturDS$Via_Entrada)
+fronturDS$Pais<-as.factor(fronturDS$Pais)
+fronturDS$Destino_CCAA<-as.factor(fronturDS$Destino_CCAA)
+fronturDS$Alojamiento<-as.factor(fronturDS$Alojamiento)
+fronturDS$Motivo<-as.factor(fronturDS$Motivo)
+fronturDS$Pernoctaciones<-as.factor(fronturDS$Pernoctaciones)
+fronturDS$Paquete_Turistico<-as.factor(fronturDS$Paquete_Turistico)
+
+fronturDS$Anyo <- gsub(" ", "",paste("20",fronturDS$Anyo))
+
+fronturDS$Fecha <- as.Date(paste("01", as.numeric(fronturDS$Mes), 
+                                as.numeric(fronturDS$Anyo),
+                               sep="-"),format = "%d-%m-%Y")
+
+fronturDS$Mes <- as.numeric(fronturDS$Mes)
+fronturDS$Anyo <- as.numeric(fronturDS$Anyo)
 
 
-head(df_Frontur)
 
-df_Paises$Pais<-as.factor(df_Paises$Pais)
-
-df_CCAA$Codigo<-as.factor(df_CCAA$Codigo)
-colnames(df_CCAA)[colnames(df_CCAA)=="Codigo"] <- "Destino_CCAA"
 
 ```
 
 
-# Revisión de los datos del fichero csv
 
-En este bloque se realiza una revisión de los datos para detectar. 
+De nuevo se realiza la revisión del dataset con las modificaciones realizadas en las variables y los estadísticos.
 
 ```{r Bloque de revisión basica del dataset}
 
-head(df_Frontur)
-tail(df_Frontur)
-nrow(df_Frontur)
-ncol(df_Frontur)
-str(df_Frontur)
+nrow(fronturDS)
+ncol(fronturDS)
+str(fronturDS)
 
 ```
 
 
 
+# Análisis de Series Temporales
 
-```{r  Bloque de test de diferencia de medias mediante regresion lineal}
+Seleccionamos las columnas que se van a utilizar para la Serie Temporal (Viajeros, Mes y AÑO).
 
-t.test(Viajeros ~ Tipo_Viajero, data = df_Frontur)
-
-```
-
-
-
-
-
-```{r  Bloque  regresion lineal Destino_CCAA}
-
-modeloF1=lm(Viajeros ~ Destino_CCAA ,  data=df_Frontur)
-summary(modeloF1)
+Pasos a realizar:
+ - Se realiza una agrupación por mes y año de la suma de los Viajeros.
+ - Se ordena los resultados por año.
+ - Se genera la serie temporal definiendo el comienzo 2015-10 y periodicidad 12 meses.
+ - Se dibuja la serie temporal
+ 
 
 
 
-```
-
-```{r  Bloque  regresion lineal Pais}
-
-modeloF2=lm(Viajeros ~ Pais ,  data=df_Frontur)
-summary(modeloF2)
+```{r Bloque de Series Temporales}
 
 
+fronturST = fronturDS[c(10,11,12,13)]
 
-```
+range(fronturST$Fecha)
+## rango de fechas "2015-10-01" "2017-04-01"
 
+#agrupo por mes y año
 
+viajeros_tmp <-fronturST  %>%  group_by(Mes,Anyo)  %>% summarise(total = sum(Viajeros))
+viajeros_tmp <- arrange(viajeros_tmp, Anyo)
 
-```{r  Bloque  regresion lineal Mes}
+viajeros_tmp$Mes<-NULL
+viajeros_tmp$Anyo<-NULL
 
-modeloF3=lm(Viajeros ~ Mes ,  data=df_Frontur)
-summary(modeloF3)
+viajeros_tmp$total<-viajeros_tmp$total/1e+6
 
+viajeros_ts = ts(viajeros_tmp, start = c(2015,10), frequency = 12)
 
-
-```
-
-
-```{r  Bloque  regresion lineal Anyo}
-
-modeloF4=lm(Viajeros ~ Anyo ,  data=df_Frontur)
-summary(modeloF4)
+ts.plot(viajeros_ts)
 
 
 
 ```
 
 
+Se considera que los datos no presentan forma creciente(tendencia) pero por el contrario si existe influencia de ciertos periodos de cualquier unidad de tiempo (estacionalidad).
+No aparecen outliers (observaciones extrañas o discordantes).
 
-```{r  Bloque  regresion lineal Multi}
 
 
+#Predicción de la Serie Temporal
 
+Se realiza la predicción de la Serie Temporal utilizando el Modelo ARIMA, para realizar predicciones se usa predict().
+
+No se ha usado forecast() porque daba error por no tener más de dos periodos.
+
+
+```{r Bloque de prediccion}
+
+logviajeros_ts <- log(viajeros_ts)
+
+fit <- arima(logviajeros_ts, c(0, 1, 1), seasonal = list(order = c(0, 1, 1), period = 12))
+
+pred <- predict(fit, n.ahead = 2 * 12) #predicción para los dos proximos año
+
+
+ts.plot(viajeros_ts,2.718^pred$pred, xlab="Año", ylab="Viajeros en millones", main = "Evolución del nº de turistas que visitan España", lty = c(1,3)) 
+abline(reg=lm(viajeros_ts~time(viajeros_ts)))
+
+#dibujamos el ACF y observamos que los datos no son estacionarios
+acf(viajeros_ts, 50)
 
 ```
+
+# Conclusiones
+
+
+Se denomina tendencia de una serie temporal a su comportamiento o movimiento a largo plazo. Por ejemplo, la gráfica adjunta muestra la serie movimientos turísticos en España, desde Octubre del 2015 hasta los próximos dos años.
+
+La línea recta podría representar la tendencia (creciente).
+
+
