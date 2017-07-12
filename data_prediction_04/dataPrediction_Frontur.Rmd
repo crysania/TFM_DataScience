@@ -196,28 +196,82 @@ Se realiza la predicción de la Serie Temporal utilizando el Modelo ARIMA, para 
 No se ha usado forecast() porque daba error por no tener más de dos periodos.
 
 
-```{r Bloque de prediccion}
+```{r Bloque de prediccion 2 añoa}
 
 logviajeros_ts <- log(viajeros_ts)
 
-fit <- arima(logviajeros_ts, c(0, 1, 1), seasonal = list(order = c(0, 1, 1), period = 12))
+ajuste <- arima(logviajeros_ts, c(0, 1, 1), seasonal = list(order = c(0, 1, 1), period = 12))
 
-pred <- predict(fit, n.ahead = 2 * 12) #predicción para los dos proximos año
+pred <- predict(ajuste, n.ahead =24) #predicción para los dos proximos año
 
 
 ts.plot(viajeros_ts,2.718^pred$pred, xlab="Año", ylab="Viajeros en millones", main = "Evolución del nº de turistas que visitan España", lty = c(1,3)) 
 abline(reg=lm(viajeros_ts~time(viajeros_ts)))
 
-#dibujamos el ACF y observamos que los datos no son estacionarios
-acf(viajeros_ts, 50)
+
 
 ```
 
+
+La serie es obviamente no estacionaria y la serie diferenciada tampoco, como puede observarse en el siguiente gráfico:
+
+
+```{r Bloque de estacionamiento}
+
+dms=diff(logviajeros_ts)
+plot(dms)
+
+
+```
+
+Los correlogramas para la serie diferenciada:
+
+```{r Bloque de correlogramas}
+
+par(mfrow=c(1,2))
+acf(dms)
+
+
+```
+
+
+```{r Bloque de correlogramas 2}
+
+#Graficamos su correlograma
+
+
+pacf(dms)
+
+```
+
+Gráfico para la predicción de 5 años:
+
+
+```{r Bloque de prediccion 5 años}
+
+
+mean(viajeros_ts)
+ajuste <- arima(logviajeros_ts, c(0, 1, 1), seasonal = list(order = c(0, 1, 1), period = 12))
+
+pred <- predict(ajuste, n.ahead =5* 12 ) #predicción para los dos proximos año
+
+
+ts.plot(viajeros_ts,2.718^pred$pred, xlab="Año", ylab="Viajeros en millones", main = "Evolución del nº de turistas que visitan España", lty = c(1,3)) 
+abline(reg=lm(viajeros_ts~time(viajeros_ts)))
+
+
+```
+
+
+
 # Conclusiones
 
+Para conseguir uno de los objetivos del TFM, realizar un análisis predictivo de la actividad turística en España, para predecir el número de turistas que decidan viajar a un lugar determinado en España, se ha utilizado el método de predicción de Serie Temporal.
 
-Se denomina tendencia de una serie temporal a su comportamiento o movimiento a largo plazo. Por ejemplo, la gráfica adjunta muestra la serie movimientos turísticos en España, desde Octubre del 2015 hasta los próximos dos años.
+Se realiza la predicción de la Serie Temporal utilizando el Modelo ARIMA, para realizar predicciones se usa predict().
+No se ha usado forecast() porque se obtiene un  error, por no tener más de dos periodos.
+Se observa una tendencia a incrementar el número de viajeros que visitarán España, sobre todo durante la estacionalidad del verano.
 
-La línea recta podría representar la tendencia (creciente).
-
+Se denomina tendencia de una serie temporal, a su comportamiento o movimiento a largo plazo. Por ejemplo, las gráficas que aparecen a continuación, muestran la tendencia en el sector turístico español en los próximos dos y cinco años.
+La línea recta, en ambas gráficas, representa la tendencia (creciente).
 
